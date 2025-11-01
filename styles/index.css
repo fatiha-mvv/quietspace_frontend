@@ -1,0 +1,19 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Styles pour le template Startup */
+
+@layer base {
+  body {
+    @apply bg-white text-body-color;
+  }
+}
+
+@layer components {
+  /* Vos composants personnalisés */
+}
+
+@layer utilities {
+  /* Vos utilitaires personnalisés */
+}
