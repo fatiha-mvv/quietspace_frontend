@@ -1,40 +1,40 @@
-import { Brand } from "@/types/brand";
+import { Brand } from "../../types/brand";
 
 const brandsData: Brand[] = [
   {
     id: 1,
-    name: "UIdeck",
-    href: "https://uideck.com",
-    image: "/images/brands/uideck.svg",
-    imageLight: "/images/brands/uideck-light.svg",
+    name: "Espaces Référencés",
+    href: "#",
+    image: "/images/brands/spaces.svg",
+    imageLight: "/images/brands/spaces-light.svg",
   },
   {
     id: 2,
-    name: "Tailgrids",
-    href: "https://tailgrids.com",
-    image: "/images/brands/tailgrids.svg",
-    imageLight: "/images/brands/tailgrids-light.svg",
+    name: "Bibliothèques",
+    href: "#",
+    image: "/images/brands/libraries.svg",
+    imageLight: "/images/brands/libraries-light.svg",
   },
   {
     id: 3,
-    name: "Lineicons",
-    href: "https://lineicons.com",
-    image: "/images/brands/lineicons.svg",
-    imageLight: "/images/brands/lineicons-light.svg",
+    name: "Cafés Tranquilles",
+    href: "#",
+    image: "/images/brands/cafes.svg",
+    imageLight: "/images/brands/cafes-light.svg",
   },
   {
     id: 4,
-    name: "Ayro UI",
-    href: "https://ayroui.com",
-    image: "/images/brands/ayroui.svg",
-    imageLight: "/images/brands/ayroui-light.svg",
+    name: "Espaces Coworking",
+    href: "#",
+    image: "/images/brands/coworking.svg",
+    imageLight: "/images/brands/coworking-light.svg",
   },
   {
     id: 5,
-    name: "PlainAdmin",
-    href: "https://plainadmin.com",
-    image: "/images/brands/plainadmin.svg",
-    imageLight: "/images/brands/plainadmin-light.svg",
+    name: "Utilisateurs Actifs",
+    href: "#",
+    image: "/images/brands/users.svg",
+    imageLight: "/images/brands/users-light.svg",
   },
 ];
 
