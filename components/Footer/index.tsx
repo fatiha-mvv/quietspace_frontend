@@ -15,28 +15,22 @@ const Footer = () => {
               <div className="mb-12 max-w-[360px] lg:mb-16">
                 <Link href="/" className="mb-8 inline-block">
                   <Image
-                    src="/images/logo/logo-2.svg"
-                    alt="logo"
-                    className="w-full dark:hidden"
-                    width={140}
-                    height={30}
-                  />
-                  <Image
-                    src="/images/logo/logo.svg"
-                    alt="logo"
-                    className="hidden w-full dark:block"
+                    src="/images/logo/quitSpace_logo.png"
+                    alt="QuietSpace Logo"
+                    className="w-full"
                     width={140}
                     height={30}
                   />
                 </Link>
                 <p className="dark:text-body-color-dark mb-9 text-base leading-relaxed text-body-color">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Integer lobortis.
+                  Trouvez votre espace de concentration idéal. QuietSpace vous aide à découvrir les meilleurs endroits calmes pour étudier et travailler près de chez vous.
                 </p>
                 <div className="flex items-center">
                   <a
-                    href="/"
-                    aria-label="social-link"
+                    href="https://facebook.com/quietspace"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
                     className="dark:text-body-color-dark mr-6 text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                   >
                     <svg
@@ -49,8 +43,10 @@ const Footer = () => {
                     </svg>
                   </a>
                   <a
-                    href="/"
-                    aria-label="social-link"
+                    href="https://twitter.com/quietspace"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Twitter"
                     className="dark:text-body-color-dark mr-6 text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                   >
                     <svg
@@ -63,22 +59,28 @@ const Footer = () => {
                     </svg>
                   </a>
                   <a
-                    href="/"
-                    aria-label="social-link"
+                    href="https://instagram.com/quietspace"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
                     className="dark:text-body-color-dark mr-6 text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                   >
                     <svg
                       width="18"
-                      height="14"
-                      viewBox="0 0 18 14"
+                      height="18"
+                      viewBox="0 0 18 18"
                       className="fill-current"
                     >
-                      <path d="M17.5058 2.07119C17.3068 1.2488 16.7099 0.609173 15.9423 0.395963C14.5778 7.26191e-08 9.0627 0 9.0627 0C9.0627 0 3.54766 7.26191e-08 2.18311 0.395963C1.41555 0.609173 0.818561 1.2488 0.619565 2.07119C0.25 3.56366 0.25 6.60953 0.25 6.60953C0.25 6.60953 0.25 9.68585 0.619565 11.1479C0.818561 11.9703 1.41555 12.6099 2.18311 12.8231C3.54766 13.2191 9.0627 13.2191 9.0627 13.2191C9.0627 13.2191 14.5778 13.2191 15.9423 12.8231C16.7099 12.6099 17.3068 11.9703 17.5058 11.1479C17.8754 9.68585 17.8754 6.60953 17.8754 6.60953C17.8754 6.60953 17.8754 3.56366 17.5058 2.07119ZM7.30016 9.44218V3.77687L11.8771 6.60953L7.30016 9.44218Z" />
+                      <path d="M9 1.62C11.403 1.62 11.688 1.63 12.637 1.673C13.514 1.713 13.99 1.86 14.308 1.98C14.728 2.135 15.028 2.323 15.343 2.638C15.658 2.953 15.846 3.253 16.001 3.673C16.121 3.991 16.268 4.467 16.308 5.344C16.351 6.293 16.361 6.578 16.361 8.981C16.361 11.384 16.351 11.669 16.308 12.618C16.268 13.495 16.121 13.971 16.001 14.289C15.846 14.709 15.658 15.009 15.343 15.324C15.028 15.639 14.728 15.827 14.308 15.982C13.99 16.102 13.514 16.249 12.637 16.289C11.688 16.332 11.403 16.342 9 16.342C6.597 16.342 6.312 16.332 5.363 16.289C4.486 16.249 4.01 16.102 3.692 15.982C3.272 15.827 2.972 15.639 2.657 15.324C2.342 15.009 2.154 14.709 1.999 14.289C1.879 13.971 1.732 13.495 1.692 12.618C1.649 11.669 1.639 11.384 1.639 8.981C1.639 6.578 1.649 6.293 1.692 5.344C1.732 4.467 1.879 3.991 1.999 3.673C2.154 3.253 2.342 2.953 2.657 2.638C2.972 2.323 3.272 2.135 3.692 1.98C4.01 1.86 4.486 1.713 5.363 1.673C6.312 1.63 6.597 1.62 9 1.62ZM9 0C6.556 0 6.249 0.011 5.289 0.054C4.331 0.097 3.677 0.25 3.105 0.473C2.513 0.703 2.011 1.01 1.511 1.51C1.011 2.01 0.704 2.512 0.474 3.104C0.251 3.676 0.098 4.33 0.055 5.288C0.012 6.248 0.001 6.555 0.001 8.999C0.001 11.443 0.012 11.75 0.055 12.71C0.098 13.668 0.251 14.322 0.474 14.894C0.704 15.486 1.011 15.988 1.511 16.488C2.011 16.988 2.513 17.295 3.105 17.525C3.677 17.748 4.331 17.901 5.289 17.944C6.249 17.987 6.556 17.998 9 17.998C11.444 17.998 11.751 17.987 12.711 17.944C13.669 17.901 14.323 17.748 14.895 17.525C15.487 17.295 15.989 16.988 16.489 16.488C16.989 15.988 17.296 15.486 17.526 14.894C17.749 14.322 17.902 13.668 17.945 12.71C17.988 11.75 17.999 11.443 17.999 8.999C17.999 6.555 17.988 6.248 17.945 5.288C17.902 4.33 17.749 3.676 17.526 3.104C17.296 2.512 16.989 2.01 16.489 1.51C15.989 1.01 15.487 0.703 14.895 0.473C14.323 0.25 13.669 0.097 12.711 0.054C11.751 0.011 11.444 0 9 0Z"/>
+                      <path d="M9 4.378C6.448 4.378 4.378 6.448 4.378 9C4.378 11.552 6.448 13.622 9 13.622C11.552 13.622 13.622 11.552 13.622 9C13.622 6.448 11.552 4.378 9 4.378ZM9 12C7.344 12 6 10.656 6 9C6 7.344 7.344 6 9 6C10.656 6 12 7.344 12 9C12 10.656 10.656 12 9 12Z"/>
+                      <circle cx="13.804" cy="4.196" r="1.078"/>
                     </svg>
                   </a>
                   <a
-                    href="/"
-                    aria-label="social-link"
+                    href="https://linkedin.com/company/quietspace"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LinkedIn"
                     className="dark:text-body-color-dark text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                   >
                     <svg
@@ -97,32 +99,40 @@ const Footer = () => {
             <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-2/12 xl:w-2/12">
               <div className="mb-12 lg:mb-16">
                 <h2 className="mb-10 text-xl font-bold text-black dark:text-white">
-                  Useful Links
+                  Navigation
                 </h2>
                 <ul>
                   <li>
-                    <a
-                      href="/blogs"
+                    <Link
+                      href="/map"
                       className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                     >
-                      Blog
-                    </a>
+                      Carte Interactive
+                    </Link>
                   </li>
                   <li>
-                    <a
-                      href="/pricing"
+                    <Link
+                      href="/spaces"
                       className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                     >
-                      Pricing
-                    </a>
+                      Tous les Espaces
+                    </Link>
                   </li>
                   <li>
-                    <a
+                    <Link
                       href="/about"
                       className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                     >
-                      About
-                    </a>
+                      À Propos
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/contact"
+                      className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
+                    >
+                      Contact
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -131,32 +141,40 @@ const Footer = () => {
             <div className="w-full px-4 sm:w-1/2 md:w-1/2 lg:w-2/12 xl:w-2/12">
               <div className="mb-12 lg:mb-16">
                 <h2 className="mb-10 text-xl font-bold text-black dark:text-white">
-                  Terms
+                  Catégories
                 </h2>
                 <ul>
                   <li>
-                    <a
-                      href="/"
+                    <Link
+                      href="/spaces?type=library"
                       className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                     >
-                      TOS
-                    </a>
+                      Bibliothèques
+                    </Link>
                   </li>
                   <li>
-                    <a
-                      href="/"
+                    <Link
+                      href="/spaces?type=cafe"
                       className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                     >
-                      Privacy Policy
-                    </a>
+                      Cafés
+                    </Link>
                   </li>
                   <li>
-                    <a
-                      href="/"
+                    <Link
+                      href="/spaces?type=coworking"
                       className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                     >
-                      Refund Policy
-                    </a>
+                      Coworking
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/spaces?type=park"
+                      className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
+                    >
+                      Espaces Publics
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -165,32 +183,40 @@ const Footer = () => {
             <div className="w-full px-4 md:w-1/2 lg:w-4/12 xl:w-3/12">
               <div className="mb-12 lg:mb-16">
                 <h2 className="mb-10 text-xl font-bold text-black dark:text-white">
-                  Support & Help
+                  Informations
                 </h2>
                 <ul>
                   <li>
-                    <a
-                      href="/contact"
+                    <Link
+                      href="/faq"
                       className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                     >
-                      Open Support Ticket
-                    </a>
+                      FAQ
+                    </Link>
                   </li>
                   <li>
-                    <a
-                      href="/"
+                    <Link
+                      href="/privacy"
                       className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                     >
-                      Terms of Use
-                    </a>
+                      Confidentialité
+                    </Link>
                   </li>
                   <li>
-                    <a
-                      href="/about"
+                    <Link
+                      href="/terms"
                       className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
                     >
-                      About
-                    </a>
+                      Conditions d'utilisation
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/contribute"
+                      className="dark:text-body-color-dark mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:hover:text-primary"
+                    >
+                      Contribuer
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -200,10 +226,9 @@ const Footer = () => {
           <div className="h-px w-full bg-gradient-to-r from-transparent via-[#D2D8E183] to-transparent dark:via-[#959CB183]"></div>
           <div className="py-8">
             <p className="text-center text-base text-body-color dark:text-white">
-              Template by UIdeck and{" "}
-              <a href="https://nextjstemplates.com" rel="nofollow noopener">
-                Next.js Templates
-              </a>
+              © {new Date().getFullYear()} QuietSpace. Tous droits réservés. 
+              <span className="mx-2">|</span>
+              Fait pour les étudiants et télétravailleurs
             </p>
           </div>
         </div>

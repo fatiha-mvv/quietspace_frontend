@@ -1,3 +1,4 @@
+// index.tsx (Features Component)
 import SectionTitle from "../Common/SectionTitle";
 import SingleFeature from "./SingleFeature";
 import featuresData from "./featuresData";
@@ -8,8 +9,8 @@ const Features = () => {
       <section id="features" className="py-16 md:py-20 lg:py-28">
         <div className="container">
           <SectionTitle
-            title="Main Features"
-            paragraph="There are many variations of passages of Lorem Ipsum available but the majority have suffered alteration in some form."
+            title="Fonctionnalités Principales"
+            paragraph="QuietSpace vous offre tous les outils nécessaires pour trouver l'espace de travail idéal. Découvrez comment notre plateforme peut améliorer votre productivité."
             center
           />
 
