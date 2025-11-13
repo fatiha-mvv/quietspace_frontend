@@ -3,9 +3,10 @@ import axios from 'axios';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export interface RegisterData {
-  name: string;
+  username: string;  // CHANGÉ de "name" à "username"
   email: string;
   password: string;
+  ville: string;
 }
 
 export interface LoginData {
@@ -21,6 +22,7 @@ export interface AuthResponse {
     email: string;
     role: string;
     avatar?: string;
+    ville?: string;  //  AJOUTÉ
     createdAt: string;
   };
 }
