@@ -9,6 +9,7 @@ import { Inter } from "next/font/google";
 import "../styles/index.css";
 import { usePathname } from "next/navigation";
 import { Providers } from "./providers";
+import 'leaflet/dist/leaflet.css';
 
 const inter = Inter({ subsets: ["latin"] });
 
