@@ -10,6 +10,7 @@ export function useAuth() {
   const router = useRouter();
 
   useEffect(() => {
+    // Cette fonction ne s'exécute que côté client
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
     setIsLoading(false);

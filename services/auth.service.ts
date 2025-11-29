@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export interface RegisterData {
-  username: string;  // CHANGÉ de "name" à "username"
+  username: string;
   email: string;
   password: string;
   ville: string;
@@ -22,15 +22,18 @@ export interface AuthResponse {
     email: string;
     role: string;
     avatar?: string;
-    ville?: string;  //  AJOUTÉ
+    ville?: string;
     createdAt: string;
   };
 }
 
+// Helper pour vérifier si on est côté client
+const isClient = typeof window !== 'undefined';
+
 class AuthService {
   async register(data: RegisterData): Promise<AuthResponse> {
     const response = await axios.post(`${API_URL}/auth/register`, data);
-    if (response.data.access_token) {
+    if (response.data.access_token && isClient) {
       localStorage.setItem('token', response.data.access_token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
@@ -39,7 +42,7 @@ class AuthService {
 
   async login(data: LoginData): Promise<AuthResponse> {
     const response = await axios.post(`${API_URL}/auth/login`, data);
-    if (response.data.access_token) {
+    if (response.data.access_token && isClient) {
       localStorage.setItem('token', response.data.access_token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
@@ -47,26 +50,56 @@ class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    if (isClient) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
   }
 
   getCurrentUser() {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!isClient) return null;
+    
+    try {
+      const userStr = localStorage.getItem('user');
+      return userStr ? JSON.parse(userStr) : null;
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
   }
 
   getToken() {
-    return localStorage.getItem('token');
+    if (!isClient) return null;
+    
+    try {
+      return localStorage.getItem('token');
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return null;
+    }
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    if (!isClient) return false;
+    
+    try {
+      return !!this.getToken();
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      return false;
+    }
   }
 
   isAdmin(): boolean {
-    const user = this.getCurrentUser();
-    return user?.role === 'admin';
+    if (!isClient) return false;
+    
+    try {
+      const user = this.getCurrentUser();
+      return user?.role === 'admin';
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      return false;
+    }
   }
 }
 

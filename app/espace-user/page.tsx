@@ -1,25 +1,52 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from 'next/dynamic';
-import { MapPin, Coffee, BookOpen, Briefcase, GraduationCap, Heart, Search, SlidersHorizontal } from "lucide-react";
+import dynamic from "next/dynamic";
+import {
+  MapPin,
+  Coffee,
+  BookOpen,
+  Briefcase,
+  GraduationCap,
+  Heart,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 
 // Import dynamique du MapComponent
-const MapComponent = dynamic(() => import('../../components/Map/MapComponent'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-full">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-    </div>
-  ),
-});
+const MapComponent = dynamic(
+  () => import("../../components/Map/MapComponent"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+      </div>
+    ),
+  },
+);
 
 // Types de lieux avec leurs icônes Lucide
 const placeTypes = [
-  { value: "BIBLIOTHEQUE", label: "Bibliothèque", Icon: BookOpen, color: "bg-blue-500" },
+  {
+    value: "BIBLIOTHEQUE",
+    label: "Bibliothèque",
+    Icon: BookOpen,
+    color: "bg-blue-500",
+  },
   { value: "CAFE", label: "Café", Icon: Coffee, color: "bg-amber-500" },
-  { value: "COWORKING", label: "Coworking", Icon: Briefcase, color: "bg-purple-500" },
-  { value: "SALLE_ETUDE", label: "Salle d'étude", Icon: GraduationCap, color: "bg-green-500" },
+  {
+    value: "COWORKING",
+    label: "Coworking",
+    Icon: Briefcase,
+    color: "bg-purple-500",
+  },
+  {
+    value: "SALLE_ETUDE",
+    label: "Salle d'étude",
+    Icon: GraduationCap,
+    color: "bg-green-500",
+  },
 ];
 
 // Niveaux de calme
@@ -46,7 +73,7 @@ const mockPlaces = [
     lng: -7.5898,
     isFavorite: false,
     address: "Boulevard Zerktouni, Casablanca",
-    hours: "8h - 22h"
+    hours: "8h - 22h",
   },
   {
     id: 2,
@@ -59,7 +86,7 @@ const mockPlaces = [
     lng: -7.6114,
     isFavorite: true,
     address: "Avenue Hassan II, Casablanca",
-    hours: "9h - 20h"
+    hours: "9h - 20h",
   },
   {
     id: 3,
@@ -72,7 +99,7 @@ const mockPlaces = [
     lng: -7.6037,
     isFavorite: false,
     address: "Rue Prince Moulay Abdellah, Casablanca",
-    hours: "7h - 23h"
+    hours: "7h - 23h",
   },
   {
     id: 4,
@@ -85,7 +112,7 @@ const mockPlaces = [
     lng: -7.5978,
     isFavorite: false,
     address: "Boulevard d'Anfa, Casablanca",
-    hours: "8h - 21h"
+    hours: "8h - 21h",
   },
   {
     id: 5,
@@ -94,11 +121,11 @@ const mockPlaces = [
     distance: 320,
     calmLevel: "CALME",
     percentage: 78,
-    lat: 33.5950,
+    lat: 33.595,
     lng: -7.6187,
     isFavorite: false,
     address: "Place Mohammed V, Casablanca",
-    hours: "7h - 23h"
+    hours: "7h - 23h",
   },
 ];
 
@@ -114,8 +141,13 @@ export default function ExplorerPage() {
 
   // Filtrage des lieux
   const filteredPlaces = places.filter((place) => {
-    if (searchQuery && !place.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    if (selectedTypes.length > 0 && !selectedTypes.includes(place.type)) return false;
+    if (
+      searchQuery &&
+      !place.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      return false;
+    if (selectedTypes.length > 0 && !selectedTypes.includes(place.type))
+      return false;
     if (selectedCalm && place.calmLevel !== selectedCalm) return false;
     if (place.distance > selectedDistance * 1000) return false;
     if (showFavorites && !place.isFavorite) return false;
@@ -125,7 +157,7 @@ export default function ExplorerPage() {
   // Toggle type de lieu
   const toggleType = (type: string) => {
     setSelectedTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
     );
   };
 
@@ -133,8 +165,8 @@ export default function ExplorerPage() {
   const toggleFavorite = (id: number) => {
     setPlaces((prev) =>
       prev.map((place) =>
-        place.id === id ? { ...place, isFavorite: !place.isFavorite } : place
-      )
+        place.id === id ? { ...place, isFavorite: !place.isFavorite } : place,
+      ),
     );
   };
 
@@ -158,11 +190,11 @@ export default function ExplorerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
             Explorer les Lieux
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
@@ -171,36 +203,36 @@ export default function ExplorerPage() {
         </div>
 
         {/* Search Bar */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+        <div className="mb-6 rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
               <input
                 type="text"
                 placeholder="Rechercher un lieu par nom..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-white transition"
+                className="w-full rounded-lg border border-gray-200 py-3 pl-12 pr-4 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700"
             >
-              <SlidersHorizontal className="w-5 h-5" />
+              <SlidersHorizontal className="h-5 w-5" />
               <span className="hidden sm:inline">Filtres</span>
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
           {/* Sidebar Filters */}
           {showFilters && (
             <div className="lg:col-span-1">
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 space-y-6">
+              <div className="space-y-6 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
                 {/* Type Filter */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                  <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                     Type de lieu
                   </h3>
                   <div className="space-y-2">
@@ -211,16 +243,18 @@ export default function ExplorerPage() {
                         <button
                           key={type.value}
                           onClick={() => toggleType(type.value)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition ${
                             isSelected
-                              ? "bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500"
-                              : "border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                              ? "border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/30"
+                              : "border-2 border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600"
                           }`}
                         >
-                          <div className={`p-2 rounded-lg ${type.color}`}>
-                            <Icon className="w-4 h-4 text-white" />
+                          <div className={`rounded-lg p-2 ${type.color}`}>
+                            <Icon className="h-4 w-4 text-white" />
                           </div>
-                          <span className={`text-sm font-medium ${isSelected ? "text-blue-700 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}>
+                          <span
+                            className={`text-sm font-medium ${isSelected ? "text-blue-700 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}
+                          >
                             {type.label}
                           </span>
                         </button>
@@ -231,13 +265,13 @@ export default function ExplorerPage() {
 
                 {/* Calme Filter */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                  <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                     Niveau de calme
                   </h3>
                   <select
                     value={selectedCalm}
                     onChange={(e) => setSelectedCalm(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white transition"
+                    className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                   >
                     <option value="">Tous les niveaux</option>
                     {calmLevels.map((level) => (
@@ -250,13 +284,15 @@ export default function ExplorerPage() {
 
                 {/* Distance Filter */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                  <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                     Distance maximale
                   </h3>
                   <select
                     value={selectedDistance}
-                    onChange={(e) => setSelectedDistance(Number(e.target.value))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white transition"
+                    onChange={(e) =>
+                      setSelectedDistance(Number(e.target.value))
+                    }
+                    className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                   >
                     {distances.map((distance) => (
                       <option key={distance} value={distance}>
@@ -269,25 +305,29 @@ export default function ExplorerPage() {
                 {/* Favoris Filter */}
                 <button
                   onClick={() => setShowFavorites(!showFavorites)}
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition ${
+                  className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 transition ${
                     showFavorites
-                      ? "bg-red-50 dark:bg-red-900/30 border-2 border-red-500 text-red-700 dark:text-red-400"
-                      : "border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
+                      ? "border-2 border-red-500 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                      : "border-2 border-gray-200 text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
-                  <Heart className={`w-5 h-5 ${showFavorites ? "fill-current" : ""}`} />
+                  <Heart
+                    className={`h-5 w-5 ${showFavorites ? "fill-current" : ""}`}
+                  />
                   <span className="font-medium">Favoris uniquement</span>
                 </button>
 
                 {/* Reset Filters */}
-                {(selectedTypes.length > 0 || selectedCalm || showFavorites) && (
+                {(selectedTypes.length > 0 ||
+                  selectedCalm ||
+                  showFavorites) && (
                   <button
                     onClick={() => {
                       setSelectedTypes([]);
                       setSelectedCalm("");
                       setShowFavorites(false);
                     }}
-                    className="w-full px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
+                    className="w-full px-4 py-2 text-sm text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                   >
                     Réinitialiser les filtres
                   </button>
@@ -299,30 +339,34 @@ export default function ExplorerPage() {
           {/* Main Content Area */}
           <div className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
             {/* Results Count & View Toggle */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6 flex items-center justify-between">
+            <div className="mb-6 flex items-center justify-between rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                <span className="font-semibold text-gray-900 dark:text-white">{filteredPlaces.length}</span> lieu{filteredPlaces.length > 1 ? "x" : ""} trouvé{filteredPlaces.length > 1 ? "s" : ""}
+                <span className="font-semibold text-gray-900 dark:text-white">
+                  {filteredPlaces.length}
+                </span>{" "}
+                lieu{filteredPlaces.length > 1 ? "x" : ""} trouvé
+                {filteredPlaces.length > 1 ? "s" : ""}
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`px-4 py-2 rounded-lg transition ${
+                  className={`rounded-lg px-4 py-2 transition ${
                     viewMode === "list"
                       ? "bg-blue-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                   }`}
                 >
                   Liste
                 </button>
                 <button
                   onClick={() => setViewMode("map")}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                  className={`flex items-center gap-2 rounded-lg px-4 py-2 transition ${
                     viewMode === "map"
                       ? "bg-blue-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                   }`}
                 >
-                  <MapPin className="w-4 h-4" />
+                  <MapPin className="h-4 w-4" />
                   Carte
                 </button>
               </div>
@@ -336,34 +380,42 @@ export default function ExplorerPage() {
                   return (
                     <div
                       key={place.id}
-                      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden"
+                      className="overflow-hidden rounded-xl bg-white shadow-sm transition hover:shadow-md dark:bg-gray-800"
                     >
                       <div className="p-6">
                         <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-4 flex-1">
-                            <div className={`p-3 rounded-xl ${getTypeColor(place.type)}`}>
-                              <Icon className="w-6 h-6 text-white" />
+                          <div className="flex flex-1 items-start gap-4">
+                            <div
+                              className={`rounded-xl p-3 ${getTypeColor(place.type)}`}
+                            >
+                              <Icon className="h-6 w-6 text-white" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
                                 {place.name}
                               </h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 flex items-center gap-1">
-                                <MapPin className="w-4 h-4" />
+                              <p className="mb-3 flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                                <MapPin className="h-4 w-4" />
                                 {place.address}
                               </p>
                               <div className="flex flex-wrap items-center gap-3">
                                 <span className="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-                                  <span className="font-medium">{place.distance}m</span>
+                                  <span className="font-medium">
+                                    {place.distance}m
+                                  </span>
                                 </span>
-                                <span className="text-gray-300 dark:text-gray-600">•</span>
+                                <span className="text-gray-300 dark:text-gray-600">
+                                  •
+                                </span>
                                 <span className="text-sm text-gray-600 dark:text-gray-400">
                                   {place.hours}
                                 </span>
-                                <span className="text-gray-300 dark:text-gray-600">•</span>
+                                <span className="text-gray-300 dark:text-gray-600">
+                                  •
+                                </span>
                                 <span
-                                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-white ${getCalmColor(
-                                    place.percentage
+                                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${getCalmColor(
+                                    place.percentage,
                                   )}`}
                                 >
                                   {place.percentage}% calme
@@ -373,10 +425,10 @@ export default function ExplorerPage() {
                           </div>
                           <button
                             onClick={() => toggleFavorite(place.id)}
-                            className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            className="flex-shrink-0 rounded-lg p-2 transition hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
                             <Heart
-                              className={`w-6 h-6 ${
+                              className={`h-6 w-6 ${
                                 place.isFavorite
                                   ? "fill-red-500 text-red-500"
                                   : "text-gray-400"
@@ -391,14 +443,14 @@ export default function ExplorerPage() {
 
                 {/* Empty State */}
                 {filteredPlaces.length === 0 && (
-                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
-                      <Search className="w-8 h-8 text-gray-400" />
+                  <div className="rounded-xl bg-white p-12 text-center shadow-sm dark:bg-gray-800">
+                    <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+                      <Search className="h-8 w-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
                       Aucun lieu trouvé
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    <p className="mb-6 text-gray-600 dark:text-gray-400">
                       Essayez d'ajuster vos filtres pour voir plus de résultats
                     </p>
                     <button
@@ -408,7 +460,7 @@ export default function ExplorerPage() {
                         setShowFavorites(false);
                         setSearchQuery("");
                       }}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                      className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700"
                     >
                       Réinitialiser tous les filtres
                     </button>
@@ -417,7 +469,10 @@ export default function ExplorerPage() {
               </div>
             ) : (
               /* Map View */
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: "600px" }}>
+              <div
+                className="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-gray-800"
+                style={{ height: "600px" }}
+              >
                 <MapComponent places={filteredPlaces} />
               </div>
             )}
