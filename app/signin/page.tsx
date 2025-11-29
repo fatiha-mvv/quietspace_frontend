@@ -33,13 +33,21 @@ const SigninPage = () => {
         email: formData.email,
         password: formData.password,
       });
-      
-      // Redirect to dashboard or home page after successful login
-      router.push("/dashboard");
+
+      // Récupérer l'utilisateur connecté
+      const user = authService.getCurrentUser();
+
+      // Redirection basée sur le rôle
+      if (user?.role === "admin") {
+        router.push("/dashboard-admin");
+      } else {
+        router.push("/");
+      }
+      // router.push("/dashboard");
     } catch (err: any) {
       setError(
-        err.response?.data?.message || 
-        "An error occurred during login. Please try again."
+        err.response?.data?.message ||
+          "An error occurred during login. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -61,7 +69,7 @@ const SigninPage = () => {
                 </p>
 
                 {error && (
-                  <div className="mb-6 rounded-sm bg-red-100 border border-red-400 text-red-700 px-4 py-3">
+                  <div className="mb-6 rounded-sm border border-red-400 bg-red-100 px-4 py-3 text-red-700">
                     {error}
                   </div>
                 )}
@@ -181,7 +189,13 @@ const SigninPage = () => {
                             className="sr-only"
                           />
                           <div className="box mr-4 flex h-5 w-5 items-center justify-center rounded border border-body-color border-opacity-20 dark:border-white dark:border-opacity-10">
-                            <span className={formData.rememberMe ? "opacity-100" : "opacity-0"}>
+                            <span
+                              className={
+                                formData.rememberMe
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              }
+                            >
                               <svg
                                 width="11"
                                 height="8"
@@ -216,7 +230,7 @@ const SigninPage = () => {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="shadow-submit dark:shadow-submit-dark flex w-full items-center justify-center rounded-sm bg-primary px-9 py-4 text-base font-medium text-white duration-300 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="shadow-submit dark:shadow-submit-dark flex w-full items-center justify-center rounded-sm bg-primary px-9 py-4 text-base font-medium text-white duration-300 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {loading ? "Signing in..." : "Sign in"}
                     </button>
