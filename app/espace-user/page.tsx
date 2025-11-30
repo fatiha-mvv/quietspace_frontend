@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import {
   MapPin,
@@ -11,7 +11,10 @@ import {
   Heart,
   Search,
   SlidersHorizontal,
+  Loader2,
 } from "lucide-react";
+import lieuxUserService, { Lieu, TypeLieu } from "../../services/lieux-user";
+import authService from "../../services/auth.service";
 
 // Import dynamique du MapComponent
 const MapComponent = dynamic(
@@ -26,28 +29,13 @@ const MapComponent = dynamic(
   },
 );
 
-// Types de lieux avec leurs icônes Lucide
-const placeTypes = [
-  {
-    value: "BIBLIOTHEQUE",
-    label: "Bibliothèque",
-    Icon: BookOpen,
-    color: "bg-blue-500",
-  },
-  { value: "CAFE", label: "Café", Icon: Coffee, color: "bg-amber-500" },
-  {
-    value: "COWORKING",
-    label: "Coworking",
-    Icon: Briefcase,
-    color: "bg-purple-500",
-  },
-  {
-    value: "SALLE_ETUDE",
-    label: "Salle d'étude",
-    Icon: GraduationCap,
-    color: "bg-green-500",
-  },
-];
+// Configuration des icônes et couleurs pour les types de lieux
+const placeTypesConfig = {
+  BIBLIOTHEQUE: { Icon: BookOpen, color: "bg-blue-500", label: "Bibliothèque" },
+  CAFE: { Icon: Coffee, color: "bg-amber-500", label: "Café" },
+  COWORKING: { Icon: Briefcase, color: "bg-purple-500", label: "Coworking" },
+  SALLE_ETUDE: { Icon: GraduationCap, color: "bg-green-500", label: "Salle d'étude" },
+};
 
 // Niveaux de calme
 const calmLevels = [
@@ -58,119 +46,176 @@ const calmLevels = [
 ];
 
 // Distances en mètres
-const distances = [50, 100, 150, 200];
-
-// Données de démonstration
-const mockPlaces = [
-  {
-    id: 1,
-    name: "Café Zen",
-    type: "CAFE",
-    distance: 200,
-    calmLevel: "TRES_CALME",
-    percentage: 85,
-    lat: 33.5731,
-    lng: -7.5898,
-    isFavorite: false,
-    address: "Boulevard Zerktouni, Casablanca",
-    hours: "8h - 22h",
-  },
-  {
-    id: 2,
-    name: "BiblioCity",
-    type: "BIBLIOTHEQUE",
-    distance: 400,
-    calmLevel: "CALME",
-    percentage: 92,
-    lat: 33.5889,
-    lng: -7.6114,
-    isFavorite: true,
-    address: "Avenue Hassan II, Casablanca",
-    hours: "9h - 20h",
-  },
-  {
-    id: 3,
-    name: "WorkHub",
-    type: "COWORKING",
-    distance: 800,
-    calmLevel: "ASSEZ_BRUYANT",
-    percentage: 55,
-    lat: 33.5651,
-    lng: -7.6037,
-    isFavorite: false,
-    address: "Rue Prince Moulay Abdellah, Casablanca",
-    hours: "7h - 23h",
-  },
-  {
-    id: 4,
-    name: "Study Space",
-    type: "SALLE_ETUDE",
-    distance: 150,
-    calmLevel: "TRES_CALME",
-    percentage: 95,
-    lat: 33.5791,
-    lng: -7.5978,
-    isFavorite: false,
-    address: "Boulevard d'Anfa, Casablanca",
-    hours: "8h - 21h",
-  },
-  {
-    id: 5,
-    name: "Café Central",
-    type: "CAFE",
-    distance: 320,
-    calmLevel: "CALME",
-    percentage: 78,
-    lat: 33.595,
-    lng: -7.6187,
-    isFavorite: false,
-    address: "Place Mohammed V, Casablanca",
-    hours: "7h - 23h",
-  },
-];
+const distances = [50, 100, 150, 200, 500, 1000];
 
 export default function ExplorerPage() {
+  // États pour les filtres
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedCalm, setSelectedCalm] = useState<string>("");
-  const [selectedDistance, setSelectedDistance] = useState<number>(200);
+  const [selectedDistance, setSelectedDistance] = useState<number>(1000);
   const [showFavorites, setShowFavorites] = useState(false);
-  const [places, setPlaces] = useState(mockPlaces);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
-  // Filtrage des lieux
-  const filteredPlaces = places.filter((place) => {
-    if (
-      searchQuery &&
-      !place.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      return false;
-    if (selectedTypes.length > 0 && !selectedTypes.includes(place.type))
-      return false;
-    if (selectedCalm && place.calmLevel !== selectedCalm) return false;
-    if (place.distance > selectedDistance * 1000) return false;
-    if (showFavorites && !place.isFavorite) return false;
-    return true;
-  });
+  // États pour les données
+  const [places, setPlaces] = useState<Lieu[]>([]);
+  const [typesLieux, setTypesLieux] = useState<TypeLieu[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userPosition, setUserPosition] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
-  // Toggle type de lieu
+  // ⭐ NOUVEAU : État pour stocker les IDs des favoris
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
+
+  // État utilisateur
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Charger les types de lieux et la position au montage
+  useEffect(() => {
+    initializePage();
+  }, []);
+
+  // ⭐ NOUVEAU : Charger les favoris quand l'utilisateur est authentifié
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadFavorites();
+    }
+  }, [isAuthenticated]);
+
+  // Charger les lieux quand les filtres changent
+  useEffect(() => {
+    loadPlaces();
+  }, [selectedTypes, selectedCalm, selectedDistance, searchQuery, showFavorites, userPosition, favoriteIds]);
+
+  /**
+   * Initialiser la page
+   */
+  const initializePage = async () => {
+    try {
+      setLoading(true);
+      
+      // Vérifier l'authentification
+      const isAuth = authService.isAuthenticated();
+      setIsAuthenticated(isAuth);
+
+      // Charger les types de lieux
+      const types = await lieuxUserService.getTypesLieux();
+      setTypesLieux(types);
+
+      // Obtenir la position de l'utilisateur
+      const position = await lieuxUserService.getUserPosition();
+      setUserPosition(position);
+
+      setError(null);
+    } catch (err) {
+      console.error('Erreur lors de l\'initialisation:', err);
+      setError('Erreur lors du chargement des données');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * ⭐ NOUVEAU : Charger les favoris de l'utilisateur
+   */
+  const loadFavorites = async () => {
+    try {
+      const favoris = await lieuxUserService.getFavoris();
+      // Extraire les IDs des lieux favoris
+      const ids = new Set(favoris.map((fav: any) => fav.lieu.idLieu));
+      setFavoriteIds(ids);
+      console.log('Favoris chargés:', ids);
+    } catch (error) {
+      console.error('Erreur lors du chargement des favoris:', error);
+    }
+  };
+
+  /**
+   * Charger les lieux avec les filtres actuels
+   */
+  const loadPlaces = async () => {
+    try {
+      setLoading(true);
+
+      // ⭐ MODIFICATION : Si on veut uniquement les favoris
+      if (showFavorites && favoriteIds.size === 0) {
+        setPlaces([]);
+        setLoading(false);
+        return;
+      }
+
+      const params = {
+        search: searchQuery || undefined,
+        types: selectedTypes.length > 0 ? selectedTypes : undefined,
+        niveauCalme: selectedCalm || undefined,
+        latitude: userPosition?.latitude,
+        longitude: userPosition?.longitude,
+        distance: selectedDistance,
+      };
+
+      let lieux = await lieuxUserService.getLieux(params);
+
+      lieux = lieux.map((lieu) => ({
+        ...lieu,
+        isFavorite: favoriteIds.has(lieu.id),
+      }));
+
+      if (showFavorites) {
+        lieux = lieux.filter((lieu) => favoriteIds.has(lieu.id));
+      }
+
+      setPlaces(lieux);
+      setError(null);
+    } catch (err) {
+      console.error('Erreur lors du chargement des lieux:', err);
+      setError('Erreur lors du chargement des lieux');
+      setPlaces([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleType = (type: string) => {
     setSelectedTypes((prev) =>
       prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
     );
   };
 
-  // Toggle favoris
-  const toggleFavorite = (id: number) => {
-    setPlaces((prev) =>
-      prev.map((place) =>
-        place.id === id ? { ...place, isFavorite: !place.isFavorite } : place,
-      ),
-    );
+  const toggleFavorite = async (id: number, isFavorite: boolean) => {
+    if (!isAuthenticated) {
+      alert('Vous devez être connecté pour gérer vos favoris');
+      return;
+    }
+
+    try {
+      await lieuxUserService.toggleFavoris(id, isFavorite);
+      
+      setFavoriteIds((prev) => {
+        const newSet = new Set(prev);
+        if (isFavorite) {
+          newSet.delete(id);
+        } else {
+          newSet.add(id);
+        }
+        return newSet;
+      });
+      
+      // Mettre à jour l'état local
+      setPlaces((prev) =>
+        prev.map((place) =>
+          place.id === id ? { ...place, isFavorite: !isFavorite } : place,
+        ),
+      );
+    } catch (error) {
+      console.error('Erreur lors du toggle favori:', error);
+      alert('Erreur lors de la modification du favori');
+    }
   };
 
-  // Obtenir la couleur du niveau de calme
   const getCalmColor = (percentage: number) => {
     if (percentage >= 85) return "bg-green-500";
     if (percentage >= 70) return "bg-blue-500";
@@ -178,16 +223,34 @@ export default function ExplorerPage() {
     return "bg-red-500";
   };
 
-  // Obtenir l'icône du type
   const getTypeIcon = (type: string) => {
-    const placeType = placeTypes.find((pt) => pt.value === type);
-    return placeType?.Icon || MapPin;
+    return placeTypesConfig[type as keyof typeof placeTypesConfig]?.Icon || MapPin;
   };
 
   const getTypeColor = (type: string) => {
-    const placeType = placeTypes.find((pt) => pt.value === type);
-    return placeType?.color || "bg-gray-500";
+    return placeTypesConfig[type as keyof typeof placeTypesConfig]?.color || "bg-gray-500";
   };
+
+  const resetAllFilters = () => {
+    setSelectedTypes([]);
+    setSelectedCalm("");
+    setShowFavorites(false);
+    setSearchQuery("");
+  };
+
+  // Affichage pendant le chargement initial
+  if (loading && places.length === 0 && !showFavorites) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Chargement des lieux...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -201,6 +264,13 @@ export default function ExplorerPage() {
             Découvrez les meilleurs espaces de travail à Casablanca
           </p>
         </div>
+
+        {/* Affichage des erreurs */}
+        {error && (
+          <div className="mb-6 rounded-xl bg-red-50 p-4 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+            {error}
+          </div>
+        )}
 
         {/* Search Bar */}
         <div className="mb-6 rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
@@ -236,9 +306,13 @@ export default function ExplorerPage() {
                     Type de lieu
                   </h3>
                   <div className="space-y-2">
-                    {placeTypes.map((type) => {
-                      const Icon = type.Icon;
+                    {typesLieux.map((type) => {
+                      const config = placeTypesConfig[type.value as keyof typeof placeTypesConfig];
+                      if (!config) return null;
+                      
+                      const Icon = config.Icon;
                       const isSelected = selectedTypes.includes(type.value);
+                      
                       return (
                         <button
                           key={type.value}
@@ -249,11 +323,15 @@ export default function ExplorerPage() {
                               : "border-2 border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600"
                           }`}
                         >
-                          <div className={`rounded-lg p-2 ${type.color}`}>
+                          <div className={`rounded-lg p-2 ${config.color}`}>
                             <Icon className="h-4 w-4 text-white" />
                           </div>
                           <span
-                            className={`text-sm font-medium ${isSelected ? "text-blue-700 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}
+                            className={`text-sm font-medium ${
+                              isSelected
+                                ? "text-blue-700 dark:text-blue-400"
+                                : "text-gray-700 dark:text-gray-300"
+                            }`}
                           >
                             {type.label}
                           </span>
@@ -289,38 +367,38 @@ export default function ExplorerPage() {
                   </h3>
                   <select
                     value={selectedDistance}
-                    onChange={(e) =>
-                      setSelectedDistance(Number(e.target.value))
-                    }
+                    onChange={(e) => setSelectedDistance(Number(e.target.value))}
                     className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                   >
                     {distances.map((distance) => (
                       <option key={distance} value={distance}>
-                        Dans un rayon de {distance}m
+                        Dans un rayon de {distance >= 1000 ? `${distance/1000}km` : `${distance}m`}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 {/* Favoris Filter */}
-                <button
-                  onClick={() => setShowFavorites(!showFavorites)}
-                  className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 transition ${
-                    showFavorites
-                      ? "border-2 border-red-500 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                      : "border-2 border-gray-200 text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600"
-                  }`}
-                >
-                  <Heart
-                    className={`h-5 w-5 ${showFavorites ? "fill-current" : ""}`}
-                  />
-                  <span className="font-medium">Favoris uniquement</span>
-                </button>
+                {isAuthenticated && (
+                  <button
+                    onClick={() => setShowFavorites(!showFavorites)}
+                    className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 transition ${
+                      showFavorites
+                        ? "border-2 border-red-500 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        : "border-2 border-gray-200 text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600"
+                    }`}
+                  >
+                    <Heart
+                      className={`h-5 w-5 ${showFavorites ? "fill-current" : ""}`}
+                    />
+                    <span className="font-medium">
+                      Favoris uniquement ({favoriteIds.size})
+                    </span>
+                  </button>
+                )}
 
                 {/* Reset Filters */}
-                {(selectedTypes.length > 0 ||
-                  selectedCalm ||
-                  showFavorites) && (
+                {(selectedTypes.length > 0 || selectedCalm || showFavorites) && (
                   <button
                     onClick={() => {
                       setSelectedTypes([]);
@@ -341,11 +419,20 @@ export default function ExplorerPage() {
             {/* Results Count & View Toggle */}
             <div className="mb-6 flex items-center justify-between rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {filteredPlaces.length}
-                </span>{" "}
-                lieu{filteredPlaces.length > 1 ? "x" : ""} trouvé
-                {filteredPlaces.length > 1 ? "s" : ""}
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Chargement...
+                  </span>
+                ) : (
+                  <>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {places.length}
+                    </span>{" "}
+                    lieu{places.length > 1 ? "x" : ""} trouvé
+                    {places.length > 1 ? "s" : ""}
+                  </>
+                )}
               </p>
               <div className="flex gap-2">
                 <button
@@ -375,7 +462,7 @@ export default function ExplorerPage() {
             {/* List View */}
             {viewMode === "list" ? (
               <div className="space-y-4">
-                {filteredPlaces.map((place) => {
+                {places.map((place) => {
                   const Icon = getTypeIcon(place.type);
                   return (
                     <div
@@ -399,42 +486,55 @@ export default function ExplorerPage() {
                                 {place.address}
                               </p>
                               <div className="flex flex-wrap items-center gap-3">
-                                <span className="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-                                  <span className="font-medium">
-                                    {place.distance}m
-                                  </span>
-                                </span>
-                                <span className="text-gray-300 dark:text-gray-600">
-                                  •
-                                </span>
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
-                                  {place.hours}
-                                </span>
-                                <span className="text-gray-300 dark:text-gray-600">
-                                  •
-                                </span>
+                                {place.distance !== undefined && (
+                                  <>
+                                    <span className="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                                      <span className="font-medium">
+                                        {place.distance >= 1000 
+                                          ? `${(place.distance / 1000).toFixed(1)}km`
+                                          : `${place.distance}m`}
+                                      </span>
+                                    </span>
+                                    <span className="text-gray-300 dark:text-gray-600">
+                                      •
+                                    </span>
+                                  </>
+                                )}
                                 <span
                                   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${getCalmColor(
-                                    place.percentage,
+                                    place.scoreCalme,
                                   )}`}
                                 >
-                                  {place.percentage}% calme
+                                  {place.scoreCalme}% calme
                                 </span>
+                                {place.noteMoyenne && (
+                                  <>
+                                    <span className="text-gray-300 dark:text-gray-600">
+                                      •
+                                    </span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                      ⭐ {place.noteMoyenne.toFixed(1)} ({place.nombreAvis} avis)
+                                    </span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
-                          <button
-                            onClick={() => toggleFavorite(place.id)}
-                            className="flex-shrink-0 rounded-lg p-2 transition hover:bg-gray-100 dark:hover:bg-gray-700"
-                          >
-                            <Heart
-                              className={`h-6 w-6 ${
-                                place.isFavorite
-                                  ? "fill-red-500 text-red-500"
-                                  : "text-gray-400"
-                              }`}
-                            />
-                          </button>
+                          {isAuthenticated && (
+                            <button
+                              onClick={() => toggleFavorite(place.id, place.isFavorite || false)}
+                              className="flex-shrink-0 rounded-lg p-2 transition hover:bg-gray-100 dark:hover:bg-gray-700"
+                              disabled={loading}
+                            >
+                              <Heart
+                                className={`h-6 w-6 ${
+                                  place.isFavorite
+                                    ? "fill-red-500 text-red-500"
+                                    : "text-gray-400"
+                                }`}
+                              />
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -442,24 +542,21 @@ export default function ExplorerPage() {
                 })}
 
                 {/* Empty State */}
-                {filteredPlaces.length === 0 && (
+                {places.length === 0 && !loading && (
                   <div className="rounded-xl bg-white p-12 text-center shadow-sm dark:bg-gray-800">
                     <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
                       <Search className="h-8 w-8 text-gray-400" />
                     </div>
                     <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                      Aucun lieu trouvé
+                      {showFavorites ? "Aucun favori trouvé" : "Aucun lieu trouvé"}
                     </h3>
                     <p className="mb-6 text-gray-600 dark:text-gray-400">
-                      Essayez d'ajuster vos filtres pour voir plus de résultats
+                      {showFavorites 
+                        ? "Vous n'avez pas encore ajouté de lieux en favoris"
+                        : "Essayez d'ajuster vos filtres pour voir plus de résultats"}
                     </p>
                     <button
-                      onClick={() => {
-                        setSelectedTypes([]);
-                        setSelectedCalm("");
-                        setShowFavorites(false);
-                        setSearchQuery("");
-                      }}
+                      onClick={resetAllFilters}
                       className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700"
                     >
                       Réinitialiser tous les filtres
@@ -473,7 +570,7 @@ export default function ExplorerPage() {
                 className="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-gray-800"
                 style={{ height: "600px" }}
               >
-                <MapComponent places={filteredPlaces} />
+                <MapComponent places={places} />
               </div>
             )}
           </div>
