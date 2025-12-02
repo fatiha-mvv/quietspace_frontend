@@ -1,82 +1,203 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-export interface TypeLieu {
-  id_type_lieu: number;
-  type_lieu: string;
-  base_score: number;
+export interface CreateLieuData {
+  idLieu?: number;
+  idTypeLieu: number;
+  nomLieu?: string;
+  descriptionLieu?: string;
+  geom?: string;
+  adresseLieu?: string;
+  imageLieu?: string;
+  createdAtLieu?: string;
 }
+
+export interface UpdateLieuData extends Partial<CreateLieuData> {}
 
 export interface Lieu {
-  id_lieu: number;
-  nom_lieu: string;
-  description_lieu?: string;
-  geom: string; // Format: "POINT(lng lat)"
-  score_calme: number;
-  niveau_calme: string;
-  adresse_lieu?: string;
-  image_lieu?: string;
-  created_at_lieu: string;
-  typeLieu?: TypeLieu; // Rendre optionnel pour correspondre au backend
-  id_type_lieu: number;
+  idLieu: number;
+  idTypeLieu: number;
+  typeLieu?: {
+    idTypeLieu: number;
+    typeLieu: string;
+    baseScore: number;
+  };
+  nomLieu?: string;
+  descriptionLieu?: string;
+  geom?: string;
+  scoreCalme?: number;
+  niveauCalme?: string;
+  adresseLieu?: string;
+  imageLieu?: string;
+  createdAtLieu?: string;
 }
 
-// Interface pour la création sans id_lieu
-export interface CreateLieuData {
-  nom_lieu: string;
-  description_lieu?: string;
-  geom: string;
-  id_type_lieu: number;
-  adresse_lieu?: string;
-  image_lieu?: string;
+export interface TypeLieu {
+  idTypeLieu: number;
+  typeLieu: string;
+  baseScore: number;
 }
 
 class LieuxService {
-  private getAuthHeaders() {
-    const token = localStorage.getItem('token');
+  private api = axios.create({
+    baseURL: `${API_BASE_URL}/lieux`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  // Gestion des erreurs
+  private handleError(error: any): never {
+    if (error.response) {
+      throw new Error(error.response.data.message || 'Erreur serveur');
+    } else if (error.request) {
+      throw new Error('Impossible de contacter le serveur');
+    } else {
+      throw new Error('Erreur de configuration');
+    }
+  }
+
+  // Convertir le chemin relatif en URL complète
+  private getImageUrl(imagePath: string | undefined): string {
+    if (!imagePath) return '';
+    
+    // Si l'image commence déjà par http:// ou https://, la retourner telle quelle
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    
+    // Sinon, construire l'URL complète avec le backend
+    // Supprimer le slash initial si présent pour éviter les doubles slashes
+    const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+    return `${API_BASE_URL}/${cleanPath}`;
+  }
+
+  // Normaliser les lieux pour avoir des URLs complètes
+  private normalizeLieu(lieu: Lieu): Lieu {
     return {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      ...lieu,
+      imageLieu: this.getImageUrl(lieu.imageLieu)
     };
   }
 
-  // Gestion des lieux
+  // Préparer les données pour la création (sans niveauCalme et scoreCalme)
+  private prepareCreateData(data: CreateLieuData): any {
+    const { niveauCalme, scoreCalme, ...cleanData } = data as any;
+    return cleanData;
+  }
+
+  // Préparer les données pour la modification (sans niveauCalme et scoreCalme)
+  private prepareUpdateData(data: UpdateLieuData): any {
+    const { niveauCalme, scoreCalme, ...cleanData } = data as any;
+    return cleanData;
+  }
+
+  // CRUD pour les lieux
   async getAll(): Promise<Lieu[]> {
-    const response = await axios.get(`${API_URL}/lieux`, this.getAuthHeaders());
-    return response.data;
+    try {
+      const response = await this.api.get('/');
+      return response.data.map((lieu: Lieu) => this.normalizeLieu(lieu));
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   async getById(id: number): Promise<Lieu> {
-    const response = await axios.get(`${API_URL}/lieux/${id}`, this.getAuthHeaders());
-    return response.data;
+    try {
+      const response = await this.api.get(`/${id}`);
+      return this.normalizeLieu(response.data);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   async create(data: CreateLieuData): Promise<Lieu> {
-    const response = await axios.post(`${API_URL}/lieux`, data, this.getAuthHeaders());
-    return response.data;
+    try {
+      const cleanData = this.prepareCreateData(data);
+      const response = await this.api.post('/', cleanData);
+      return this.normalizeLieu(response.data);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
-  async update(id: number, data: Partial<CreateLieuData>): Promise<Lieu> {
-    const response = await axios.patch(`${API_URL}/lieux/${id}`, data, this.getAuthHeaders());
-    return response.data;
+  async update(id: number, data: UpdateLieuData): Promise<Lieu> {
+    try {
+      const cleanData = this.prepareUpdateData(data);
+      const response = await this.api.patch(`/${id}`, cleanData);
+      return this.normalizeLieu(response.data);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
-  async delete(id: number): Promise<{ message: string }> {
-    const response = await axios.delete(`${API_URL}/lieux/${id}`, this.getAuthHeaders());
-    return response.data;
+  async delete(id: number): Promise<void> {
+    try {
+      await this.api.delete(`/${id}`);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  // Recherche avancée
+  async getNearby(lat: number, lng: number, radius: number): Promise<Lieu[]> {
+    try {
+      const response = await this.api.get('/recherche/proximite', {
+        params: { lat, lng, radius }
+      });
+      return response.data.map((lieu: Lieu) => this.normalizeLieu(lieu));
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async getByType(idTypeLieu: number): Promise<Lieu[]> {
+    try {
+      const response = await this.api.get(`/type/${idTypeLieu}`);
+      return response.data.map((lieu: Lieu) => this.normalizeLieu(lieu));
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // Gestion des types de lieux
   async getTypesLieu(): Promise<TypeLieu[]> {
-    const response = await axios.get(`${API_URL}/type-lieu`, this.getAuthHeaders());
-    return response.data;
+    try {
+      const response = await this.api.get('/types/all');
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   async getTypeLieuById(id: number): Promise<TypeLieu> {
-    const response = await axios.get(`${API_URL}/type-lieu/${id}`, this.getAuthHeaders());
-    return response.data;
+    try {
+      const response = await this.api.get(`/types/${id}`);
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  // Upload d'image
+  async uploadImage(file: File): Promise<string> {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await this.api.post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Le backend renvoie le chemin relatif (ex: images/lieux/photo.jpg)
+      // On retourne ce chemin tel quel, il sera normalisé lors de la récupération
+      return response.data.url || response.data.path || response.data.filename;
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 }
 
