@@ -18,9 +18,10 @@ import L from "leaflet";
 // Correction des icônes Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "/images/marker-icon-2x.png",
-  iconUrl: "/images/marker-icon.png",
-  shadowUrl: "/images/marker-shadow.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
 // Composant pour gérer les clics sur la carte
@@ -220,89 +221,6 @@ export default function AdminLieuxPage() {
     }));
     console.log("Geom mis à jour depuis carte:", geom);
   };
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   // DEBUG: Vérifier ce qui est envoyé
-  //   console.log("Données envoyées au backend:");
-  //   console.log("Latitude:", latitude);
-  //   console.log("Longitude:", longitude);
-  //   console.log("Geom:", form.geom);
-  //   console.log("Form complet:", form);
-
-  //   // Validation
-  //   if (!form.nomLieu.trim()) {
-  //     alert("Le nom du lieu est requis");
-  //     return;
-  //   }
-
-  //   if (!form.idTypeLieu || form.idTypeLieu === 0) {
-  //     alert("Veuillez sélectionner un type de lieu");
-  //     return;
-  //   }
-
-  //   // Validation des coordonnées
-  //   const lat = parseFloat(latitude);
-  //   const lng = parseFloat(longitude);
-  //   if (isNaN(lat) || isNaN(lng)) {
-  //     alert("Veuillez entrer des coordonnées valides");
-  //     return;
-  //   }
-
-  //   if (lat < -90 || lat > 90) {
-  //     alert("La latitude doit être comprise entre -90 et 90");
-  //     return;
-  //   }
-
-  //   if (lng < -180 || lng > 180) {
-  //     alert("La longitude doit être comprise entre -180 et 180");
-  //     return;
-  //   }
-
-  //   try {
-  //     setIsUploading(true);
-  //     let imageUrl = form.imageLieu;
-
-  //     // Si une nouvelle image est sélectionnée, l'uploader
-  //     if (selectedImage) {
-  //       try {
-  //         imageUrl = await lieuxService.uploadImage(selectedImage);
-  //         console.log("Image uploadée:", imageUrl);
-  //       } catch (error) {
-  //         console.error("Erreur lors de l'upload de l'image:", error);
-  //         alert(
-  //           "Erreur lors de l'upload de l'image. Le lieu sera enregistré sans image.",
-  //         );
-  //         imageUrl = "";
-  //       }
-  //     }
-
-  //     const lieuData: CreateLieuData = {
-  //       ...form,
-  //       imageLieu: imageUrl,
-  //     };
-
-  //     if (editingId) {
-  //       await lieuxService.update(editingId, lieuData);
-  //       alert("Lieu modifié avec succès");
-  //     } else {
-  //       await lieuxService.create(lieuData);
-  //       alert("Lieu ajouté avec succès");
-  //     }
-
-  //     // Réinitialiser le formulaire
-  //     resetForm();
-  //     fetchLieux();
-  //   } catch (err) {
-  //     console.error("Erreur lors de l'enregistrement:", err);
-  //     alert(
-  //       `Erreur lors de l'enregistrement du lieu: ${err instanceof Error ? err.message : "Erreur inconnue"}`,
-  //     );
-  //   } finally {
-  //     setIsUploading(false);
-  //   }
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -874,9 +792,9 @@ export default function AdminLieuxPage() {
                       <td className="p-4">
                         <div className="text-center">
                           <div
-                            className={`text-lg font-semibold ${lieu.scoreCalme ? "text-gray-900" : "text-gray-400"}`}
+                            className={`text-lg font-semibold ${lieu.scoreCalme !== null ? "text-gray-900" : "text-gray-400"}`}
                           >
-                            {lieu.scoreCalme || "N/A"}
+                            {lieu.scoreCalme !== null ? lieu.scoreCalme : "N/A"}
                           </div>
                         </div>
                       </td>
