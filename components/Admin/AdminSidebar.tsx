@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -39,23 +37,11 @@ export default function AdminSidebar({
       path: "/dashboard-admin/lieux",
     },
     {
-      id: "users",
-      label: "Utilisateurs",
-      icon: "users",
-      path: "/dashboard-admin/utilisateurs",
-    },
-    {
       id: "messages",
-      label: "Messages",
+      label: "Feedback",
       icon: "messages",
       path: "/dashboard-admin/messages",
       badge: pendingMessages,
-    },
-    {
-      id: "reviews",
-      label: "Avis",
-      icon: "reviews",
-      path: "/dashboard-admin/avis",
     },
   ];
 
@@ -87,7 +73,14 @@ export default function AdminSidebar({
   const getIcon = (iconName: string) => {
     const icons = {
       overview: (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <rect x="3" y="3" width="6" height="6" rx="1" />
           <rect x="11" y="3" width="6" height="6" rx="1" />
           <rect x="3" y="11" width="6" height="6" rx="1" />
@@ -95,24 +88,52 @@ export default function AdminSidebar({
         </svg>
       ),
       spaces: (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M10 2C6.13 2 3 5.13 3 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
           <circle cx="10" cy="9" r="2" />
         </svg>
       ),
       users: (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M17 19v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
           <circle cx="10" cy="7" r="4" />
         </svg>
       ),
       messages: (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M19 13a2 2 0 0 1-2 2H5l-4 4V3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
       ),
       reviews: (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M10 2l2.5 5 5.5.5-4 4 1 5.5-5-3-5 3 1-5.5-4-4 5.5-.5L10 2z" />
         </svg>
       ),
@@ -144,22 +165,26 @@ export default function AdminSidebar({
             </div>
           )}
         </Link>
-        
+
         {/* Toggle Button */}
         <button
           onClick={onToggleCollapse}
           className="absolute -right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white shadow-md transition-colors hover:bg-gray-50"
         >
-          <svg 
-            width="12" 
-            height="12" 
-            viewBox="0 0 12 12" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2"
-            className={`transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
+            className={`transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
           >
-            <path d="M4 2L8 6L4 10" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M4 2L8 6L4 10"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       </div>
@@ -217,16 +242,17 @@ export default function AdminSidebar({
                 onClick={() => handleSectionClick(item.id, item.path)}
                 className={`
                   group relative flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-all
-                  ${pathname === item.path
-                    ? "bg-[#2B7FD8] text-white shadow-md shadow-[#2B7FD8]/30"
-                    : "text-gray-600 hover:bg-blue-50 hover:text-[#2B7FD8]"
+                  ${
+                    pathname === item.path
+                      ? "bg-[#2B7FD8] text-white shadow-md shadow-[#2B7FD8]/30"
+                      : "text-gray-600 hover:bg-blue-50 hover:text-[#2B7FD8]"
                   }
-                  ${isCollapsed ? 'justify-center' : ''}
+                  ${isCollapsed ? "justify-center" : ""}
                 `}
-                title={isCollapsed ? item.label : ''}
+                title={isCollapsed ? item.label : ""}
               >
                 {getIcon(item.icon)}
-                
+
                 {!isCollapsed && (
                   <>
                     <span className="text-sm font-medium">{item.label}</span>
@@ -240,7 +266,7 @@ export default function AdminSidebar({
 
                 {/* Tooltip pour la version réduite */}
                 {isCollapsed && (
-                  <div className="absolute left-full ml-2 z-50 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-sm text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <div className="absolute left-full z-50 ml-2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-sm text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     {item.label}
                     {item.badge && item.badge > 0 && (
                       <span className="ml-1 text-xs">({item.badge})</span>
@@ -250,7 +276,7 @@ export default function AdminSidebar({
 
                 {/* Badge pour la version réduite */}
                 {isCollapsed && item.badge && item.badge > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                     {item.badge}
                   </span>
                 )}
@@ -272,16 +298,42 @@ export default function AdminSidebar({
           title={isCollapsed ? "Déconnexion" : ""}
         >
           {isLoggingOut ? (
-            <svg className="h-5 w-5 animate-spin text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              className="h-5 w-5 animate-spin text-red-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
           ) : (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M7 19H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h4M14 15l5-5-5-5M19 10H7" strokeLinecap="round" />
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                d="M7 19H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h4M14 15l5-5-5-5M19 10H7"
+                strokeLinecap="round"
+              />
             </svg>
           )}
-          
+
           {!isCollapsed && (
             <span className="text-sm font-medium">
               {isLoggingOut ? "Déconnexion..." : "Déconnexion"}
