@@ -41,7 +41,7 @@ export interface TypeLieu {
 
 class LieuxService {
   private api = axios.create({
-    baseURL: `${API_BASE_URL}/lieux`,
+    baseURL: `${API_BASE_URL}/lieuxAdmin`,
     headers: {
       'Content-Type': 'application/json',
     },
