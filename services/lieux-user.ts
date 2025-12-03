@@ -4,6 +4,12 @@ import authService from './auth.service';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+// Position par défaut : Centre de Casablanca
+export const DEFAULT_POSITION = {
+  latitude: 33.5731,
+  longitude: -7.5898,
+};
+
 export interface TypeLieu {
   value: string;
   label: string;
@@ -31,15 +37,15 @@ export interface Lieu {
 
 export interface GetLieuxParams {
   search?: string;
-  types?: string[]; // ["BIBLIOTHEQUE", "CAFE"]
-  niveauCalme?: string; // "TRES_CALME", "CALME", etc.
+  types?: string[];
+  niveauCalme?: string;
   latitude?: number;
   longitude?: number;
-  distance?: number; // en mètres
+  distance?: number;
 }
 
 export interface AvisData {
-  note: number; // 1-5
+  note: number;
 }
 
 export interface AvisResponse {
@@ -53,6 +59,13 @@ export interface AvisResponse {
   };
 }
 
+export interface UserPosition {
+  latitude: number;
+  longitude: number;
+  isDefault: boolean;
+  accuracy?: number;
+  timestamp?: number;
+}
 
 // Intercepteur pour ajouter le token automatiquement
 axios.interceptors.request.use(
@@ -68,14 +81,10 @@ axios.interceptors.request.use(
   }
 );
 
-
-
 class LieuxUserService {
   
-  /**
-   * Récupérer tous les types de lieux
-   * GET /api/lieux/types
-   */
+  // ========== MÉTHODES API ==========
+
   async getTypesLieux(): Promise<TypeLieu[]> {
     try {
       const response = await axios.get(`${API_URL}/lieux/types`);
@@ -86,8 +95,6 @@ class LieuxUserService {
     }
   }
 
-  
-  //
   async getLieux(params?: GetLieuxParams): Promise<Lieu[]> {
     try {
       const queryParams = new URLSearchParams();
@@ -126,8 +133,6 @@ class LieuxUserService {
     }
   }
 
-  
-  //
   async getLieuById(id: number): Promise<Lieu> {
     try {
       const response = await axios.get(`${API_URL}/lieux/${id}`);
@@ -138,8 +143,6 @@ class LieuxUserService {
     }
   }
 
-  
-  //
   async getFavoris(): Promise<any[]> {
     try {
       if (!authService.isAuthenticated()) {
@@ -155,8 +158,6 @@ class LieuxUserService {
     }
   }
 
-  
-  //
   async addFavoris(lieuId: number): Promise<{ message: string }> {
     try {
       if (!authService.isAuthenticated()) {
@@ -171,8 +172,6 @@ class LieuxUserService {
     }
   }
 
-  
-  //
   async removeFavoris(lieuId: number): Promise<{ message: string }> {
     try {
       if (!authService.isAuthenticated()) {
@@ -187,7 +186,6 @@ class LieuxUserService {
     }
   }
 
-  //
   async toggleFavoris(lieuId: number, isFavorite: boolean): Promise<{ message: string }> {
     if (isFavorite) {
       return this.removeFavoris(lieuId);
@@ -196,8 +194,6 @@ class LieuxUserService {
     }
   }
 
-  
-  //
   async createOrUpdateAvis(lieuId: number, note: number): Promise<AvisResponse> {
     try {
       if (!authService.isAuthenticated()) {
@@ -219,8 +215,6 @@ class LieuxUserService {
     }
   }
 
- 
-  //
   async getAvisByLieu(lieuId: number): Promise<any[]> {
     try {
       const response = await axios.get(`${API_URL}/avis/lieu/${lieuId}`);
@@ -231,8 +225,6 @@ class LieuxUserService {
     }
   }
 
- 
-  //
   async getMyAvis(): Promise<any[]> {
     try {
       if (!authService.isAuthenticated()) {
@@ -248,7 +240,6 @@ class LieuxUserService {
     }
   }
 
-  //
   async deleteAvis(lieuId: number): Promise<{ message: string }> {
     try {
       if (!authService.isAuthenticated()) {
@@ -262,42 +253,6 @@ class LieuxUserService {
       throw error;
     }
   }
-
-  /** IL FAUT CHANGEEER CELAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-   * 
-   * Obtenir la position géographique de l'utilisateur
-   * Utilise l'API Geolocation du navigateur
-   */
-  async getUserPosition(): Promise<{ latitude: number; longitude: number } | null> {
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        console.warn('La géolocalisation n\'est pas supportée par ce navigateur');
-        resolve(null);
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error('Erreur de géolocalisation:', error);
-          // Position par défaut : Centre de Casablanca
-          resolve({
-            latitude: 33.5731,
-            longitude: -7.5898,
-          });
-        }
-      );
-    });
-  }
-
-
-
-
 }
 
 export default new LieuxUserService();

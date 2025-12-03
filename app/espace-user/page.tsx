@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import {
   MapPin,
@@ -12,9 +12,12 @@ import {
   Search,
   SlidersHorizontal,
   Loader2,
+  RefreshCw,
+  MapPinOff,
 } from "lucide-react";
 import lieuxUserService, { Lieu, TypeLieu } from "../../services/lieux-user";
 import authService from "../../services/auth.service";
+import { useUserLocation } from "../../app/hooks/useUserLocation";
 
 // Import dynamique du MapComponent
 const MapComponent = dynamic(
@@ -46,9 +49,15 @@ const calmLevels = [
 ];
 
 // Distances en mètres
-const distances = [50, 100, 150, 200, 500, 1000];
+const distances = [50, 100, 150, 200, 500, 1000, 2000, 5000];
 
 export default function ExplorerPage() {
+  const { userPosition, isLoading: isLoadingPosition, error: positionError, getPosition } = useUserLocation({
+    highAccuracy: true,
+    watchPosition: false,
+    timeout: 10000,
+  });
+
   // États pour les filtres
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedCalm, setSelectedCalm] = useState<string>("");
@@ -63,85 +72,34 @@ export default function ExplorerPage() {
   const [typesLieux, setTypesLieux] = useState<TypeLieu[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userPosition, setUserPosition] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
 
-  // ⭐ NOUVEAU : État pour stocker les IDs des favoris
+  // États pour les favoris
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
 
   // État utilisateur
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Charger les types de lieux et la position au montage
+  const isInitialized = useRef(false);
+
+  // Charger les types de lieux au montage
   useEffect(() => {
     initializePage();
   }, []);
 
-  // ⭐ NOUVEAU : Charger les favoris quand l'utilisateur est authentifié
+  // Charger les favoris quand l'utilisateur est authentifié
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isInitialized.current) {
       loadFavorites();
     }
   }, [isAuthenticated]);
 
-  // Charger les lieux quand les filtres changent
-  useEffect(() => {
-    loadPlaces();
-  }, [selectedTypes, selectedCalm, selectedDistance, searchQuery, showFavorites, userPosition, favoriteIds]);
+  
+  const loadPlaces = useCallback(async () => {
+    if (!userPosition) return;
 
-  /**
-   * Initialiser la page
-   */
-  const initializePage = async () => {
-    try {
-      setLoading(true);
-      
-      // Vérifier l'authentification
-      const isAuth = authService.isAuthenticated();
-      setIsAuthenticated(isAuth);
-
-      // Charger les types de lieux
-      const types = await lieuxUserService.getTypesLieux();
-      setTypesLieux(types);
-
-      // Obtenir la position de l'utilisateur
-      const position = await lieuxUserService.getUserPosition();
-      setUserPosition(position);
-
-      setError(null);
-    } catch (err) {
-      console.error('Erreur lors de l\'initialisation:', err);
-      setError('Erreur lors du chargement des données');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
-   * ⭐ NOUVEAU : Charger les favoris de l'utilisateur
-   */
-  const loadFavorites = async () => {
-    try {
-      const favoris = await lieuxUserService.getFavoris();
-      // Extraire les IDs des lieux favoris
-      const ids = new Set(favoris.map((fav: any) => fav.lieu.idLieu));
-      setFavoriteIds(ids);
-      console.log('Favoris chargés:', ids);
-    } catch (error) {
-      console.error('Erreur lors du chargement des favoris:', error);
-    }
-  };
-
-  /**
-   * Charger les lieux avec les filtres actuels
-   */
-  const loadPlaces = async () => {
     try {
       setLoading(true);
 
-      // ⭐ MODIFICATION : Si on veut uniquement les favoris
       if (showFavorites && favoriteIds.size === 0) {
         setPlaces([]);
         setLoading(false);
@@ -152,10 +110,12 @@ export default function ExplorerPage() {
         search: searchQuery || undefined,
         types: selectedTypes.length > 0 ? selectedTypes : undefined,
         niveauCalme: selectedCalm || undefined,
-        latitude: userPosition?.latitude,
-        longitude: userPosition?.longitude,
+        latitude: userPosition.latitude,
+        longitude: userPosition.longitude,
         distance: selectedDistance,
       };
+
+      console.log('🔍 Chargement des lieux avec params:', params);
 
       let lieux = await lieuxUserService.getLieux(params);
 
@@ -176,6 +136,67 @@ export default function ExplorerPage() {
       setPlaces([]);
     } finally {
       setLoading(false);
+    }
+  }, [
+    userPosition?.latitude,
+    userPosition?.longitude,
+    selectedTypes,
+    selectedCalm,
+    selectedDistance,
+    searchQuery,
+    showFavorites,
+    favoriteIds.size, 
+  ]);
+
+ 
+  useEffect(() => {
+    if (userPosition && isInitialized.current) {
+      loadPlaces();
+    }
+  }, [loadPlaces, userPosition?.latitude, userPosition?.longitude]);
+
+  
+  useEffect(() => {
+    if (userPosition && typesLieux.length > 0 && !isInitialized.current) {
+      isInitialized.current = true;
+      loadPlaces();
+    }
+  }, [userPosition, typesLieux.length, loadPlaces]);
+
+  /**
+   * Initialiser la page
+   */
+  const initializePage = async () => {
+    try {
+      setLoading(true);
+      
+      // Vérifier l'authentification
+      const isAuth = authService.isAuthenticated();
+      setIsAuthenticated(isAuth);
+
+      // Charger les types de lieux
+      const types = await lieuxUserService.getTypesLieux();
+      setTypesLieux(types);
+
+      setError(null);
+    } catch (err) {
+      console.error('Erreur lors de l\'initialisation:', err);
+      setError('Erreur lors du chargement des données');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Charger les favoris de l'utilisateur
+   */
+  const loadFavorites = async () => {
+    try {
+      const favoris = await lieuxUserService.getFavoris();
+      const ids = new Set(favoris.map((fav: any) => fav.lieu.idLieu));
+      setFavoriteIds(ids);
+    } catch (error) {
+      console.error('Erreur lors du chargement des favoris:', error);
     }
   };
 
@@ -204,7 +225,6 @@ export default function ExplorerPage() {
         return newSet;
       });
       
-      // Mettre à jour l'état local
       setPlaces((prev) =>
         prev.map((place) =>
           place.id === id ? { ...place, isFavorite: !isFavorite } : place,
@@ -239,14 +259,19 @@ export default function ExplorerPage() {
   };
 
   // Affichage pendant le chargement initial
-  if (loading && places.length === 0 && !showFavorites) {
+  if (!userPosition || (loading && places.length === 0 && !isInitialized.current)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
           <p className="mt-4 text-gray-600 dark:text-gray-400">
-            Chargement des lieux...
+            {isLoadingPosition ? 'Récupération de votre position...' : 'Chargement des lieux...'}
           </p>
+          {positionError && (
+            <p className="mt-2 text-sm text-amber-600">
+              Utilisation de la position par défaut (Casablanca)
+            </p>
+          )}
         </div>
       </div>
     );
@@ -257,12 +282,46 @@ export default function ExplorerPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-            Explorer les Lieux
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Découvrez les meilleurs espaces de travail à Casablanca
-          </p>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+                Explorer les Lieux
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Découvrez les meilleurs espaces de travail à Casablanca
+              </p>
+            </div>
+            
+            {/* Statut de géolocalisation */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-sm dark:bg-gray-800">
+                {userPosition.isDefault ? (
+                  <>
+                    <MapPinOff className="h-5 w-5 text-amber-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Position par défaut
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="h-5 w-5 text-green-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Position GPS
+                      {userPosition.accuracy && ` (±${Math.round(userPosition.accuracy)}m)`}
+                    </span>
+                  </>
+                )}
+              </div>
+              <button
+                onClick={getPosition}
+                disabled={isLoadingPosition}
+                className="rounded-lg p-2 text-blue-600 transition hover:bg-blue-50 disabled:opacity-50 dark:hover:bg-blue-900/30"
+                title="Rafraîchir la position"
+              >
+                <RefreshCw className={`h-5 w-5 ${isLoadingPosition ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Affichage des erreurs */}
@@ -570,7 +629,11 @@ export default function ExplorerPage() {
                 className="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-gray-800"
                 style={{ height: "600px" }}
               >
-                <MapComponent places={places} />
+                <MapComponent 
+                  places={places} 
+                  userPosition={userPosition}
+                  showUserPosition={true}
+                />
               </div>
             )}
           </div>
@@ -579,3 +642,9 @@ export default function ExplorerPage() {
     </div>
   );
 }
+
+
+
+
+
+
