@@ -1,4 +1,3 @@
-// hooks/useVilles.ts → OK
 import { useState, useEffect } from 'react';
 
 interface Ville {

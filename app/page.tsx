@@ -1,14 +1,13 @@
 import Brands from "../components/Brands";
 import ScrollUp from "../components/Common/ScrollUp";
-import Contact from "../components/Contact";
+import Feedback from "../components/Feedback";
 import Features from "../components/Features";
 import Hero from "../components/Hero";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Free Next.js Template for Startup and SaaS",
-  description: "This is Home for Startup Nextjs Template",
-  // other metadata
+  title: "QuietSpace",
+  description: "This is your place to find a quietspace",
 };
 
 export default function Home() {
@@ -17,10 +16,10 @@ export default function Home() {
       <ScrollUp />
       <Hero />
       <Features />
-      
+
       <Brands />
-      
-      <Contact />
+
+      <Feedback />
     </>
   );
 }

@@ -19,7 +19,7 @@ export default function AdminSidebar({
 }: AdminSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [pendingMessages] = useState(12);
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { logout, user } = useAuth();
 
@@ -41,7 +41,6 @@ export default function AdminSidebar({
       label: "Feedback",
       icon: "messages",
       path: "/dashboard-admin/messages",
-      badge: pendingMessages,
     },
   ];
 
@@ -256,11 +255,6 @@ export default function AdminSidebar({
                 {!isCollapsed && (
                   <>
                     <span className="text-sm font-medium">{item.label}</span>
-                    {item.badge && item.badge > 0 && (
-                      <span className="ml-auto rounded-full bg-[#2B7FD8] px-2 py-0.5 text-xs font-semibold text-white">
-                        {item.badge}
-                      </span>
-                    )}
                   </>
                 )}
 
@@ -268,17 +262,7 @@ export default function AdminSidebar({
                 {isCollapsed && (
                   <div className="absolute left-full z-50 ml-2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-sm text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     {item.label}
-                    {item.badge && item.badge > 0 && (
-                      <span className="ml-1 text-xs">({item.badge})</span>
-                    )}
                   </div>
-                )}
-
-                {/* Badge pour la version réduite */}
-                {isCollapsed && item.badge && item.badge > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                    {item.badge}
-                  </span>
                 )}
               </button>
             </li>

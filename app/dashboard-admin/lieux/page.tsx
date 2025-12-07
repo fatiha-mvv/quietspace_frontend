@@ -297,7 +297,7 @@ export default function AdminLieuxPage() {
 
       const lieuData: CreateLieuData = {
         ...form,
-        geom: geomToSend, // ← Utiliser le geom garanti en WKT
+        geom: geomToSend, 
         imageLieu: imageUrl,
       };
 

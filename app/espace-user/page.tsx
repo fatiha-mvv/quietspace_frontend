@@ -18,6 +18,8 @@ import {
 import lieuxUserService, { Lieu, TypeLieu } from "../../services/lieux-user";
 import authService from "../../services/auth.service";
 import { useUserLocation } from "../../app/hooks/useUserLocation";
+import { useRouter } from "next/navigation";
+import { Info } from "lucide-react"; // en haut du fichier si pas déjà importé
 
 // Import dynamique du MapComponent
 const MapComponent = dynamic(
@@ -37,7 +39,11 @@ const placeTypesConfig = {
   BIBLIOTHEQUE: { Icon: BookOpen, color: "bg-blue-500", label: "Bibliothèque" },
   CAFE: { Icon: Coffee, color: "bg-amber-500", label: "Café" },
   COWORKING: { Icon: Briefcase, color: "bg-purple-500", label: "Coworking" },
-  SALLE_ETUDE: { Icon: GraduationCap, color: "bg-green-500", label: "Salle d'étude" },
+  SALLE_ETUDE: {
+    Icon: GraduationCap,
+    color: "bg-green-500",
+    label: "Salle d'étude",
+  },
 };
 
 // Niveaux de calme
@@ -52,11 +58,18 @@ const calmLevels = [
 const distances = [50, 100, 150, 200, 500, 1000, 2000, 5000];
 
 export default function ExplorerPage() {
-  const { userPosition, isLoading: isLoadingPosition, error: positionError, getPosition } = useUserLocation({
+  const {
+    userPosition,
+    isLoading: isLoadingPosition,
+    error: positionError,
+    getPosition,
+  } = useUserLocation({
     highAccuracy: true,
     watchPosition: false,
     timeout: 10000,
   });
+
+  const router = useRouter();
 
   // États pour les filtres
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -93,7 +106,6 @@ export default function ExplorerPage() {
     }
   }, [isAuthenticated]);
 
-  
   const loadPlaces = useCallback(async () => {
     if (!userPosition) return;
 
@@ -115,7 +127,7 @@ export default function ExplorerPage() {
         distance: selectedDistance,
       };
 
-      console.log('🔍 Chargement des lieux avec params:', params);
+      console.log(" Chargement des lieux avec params:", params);
 
       let lieux = await lieuxUserService.getLieux(params);
 
@@ -131,8 +143,8 @@ export default function ExplorerPage() {
       setPlaces(lieux);
       setError(null);
     } catch (err) {
-      console.error('Erreur lors du chargement des lieux:', err);
-      setError('Erreur lors du chargement des lieux');
+      console.error("Erreur lors du chargement des lieux:", err);
+      setError("Erreur lors du chargement des lieux");
       setPlaces([]);
     } finally {
       setLoading(false);
@@ -145,17 +157,15 @@ export default function ExplorerPage() {
     selectedDistance,
     searchQuery,
     showFavorites,
-    favoriteIds.size, 
+    favoriteIds.size,
   ]);
 
- 
   useEffect(() => {
     if (userPosition && isInitialized.current) {
       loadPlaces();
     }
   }, [loadPlaces, userPosition?.latitude, userPosition?.longitude]);
 
-  
   useEffect(() => {
     if (userPosition && typesLieux.length > 0 && !isInitialized.current) {
       isInitialized.current = true;
@@ -169,7 +179,7 @@ export default function ExplorerPage() {
   const initializePage = async () => {
     try {
       setLoading(true);
-      
+
       // Vérifier l'authentification
       const isAuth = authService.isAuthenticated();
       setIsAuthenticated(isAuth);
@@ -180,8 +190,8 @@ export default function ExplorerPage() {
 
       setError(null);
     } catch (err) {
-      console.error('Erreur lors de l\'initialisation:', err);
-      setError('Erreur lors du chargement des données');
+      console.error("Erreur lors de l'initialisation:", err);
+      setError("Erreur lors du chargement des données");
     } finally {
       setLoading(false);
     }
@@ -196,7 +206,7 @@ export default function ExplorerPage() {
       const ids = new Set(favoris.map((fav: any) => fav.lieu.idLieu));
       setFavoriteIds(ids);
     } catch (error) {
-      console.error('Erreur lors du chargement des favoris:', error);
+      console.error("Erreur lors du chargement des favoris:", error);
     }
   };
 
@@ -208,13 +218,13 @@ export default function ExplorerPage() {
 
   const toggleFavorite = async (id: number, isFavorite: boolean) => {
     if (!isAuthenticated) {
-      alert('Vous devez être connecté pour gérer vos favoris');
+      alert("Vous devez être connecté pour gérer vos favoris");
       return;
     }
 
     try {
       await lieuxUserService.toggleFavoris(id, isFavorite);
-      
+
       setFavoriteIds((prev) => {
         const newSet = new Set(prev);
         if (isFavorite) {
@@ -224,15 +234,15 @@ export default function ExplorerPage() {
         }
         return newSet;
       });
-      
+
       setPlaces((prev) =>
         prev.map((place) =>
           place.id === id ? { ...place, isFavorite: !isFavorite } : place,
         ),
       );
     } catch (error) {
-      console.error('Erreur lors du toggle favori:', error);
-      alert('Erreur lors de la modification du favori');
+      console.error("Erreur lors du toggle favori:", error);
+      alert("Erreur lors de la modification du favori");
     }
   };
 
@@ -244,11 +254,16 @@ export default function ExplorerPage() {
   };
 
   const getTypeIcon = (type: string) => {
-    return placeTypesConfig[type as keyof typeof placeTypesConfig]?.Icon || MapPin;
+    return (
+      placeTypesConfig[type as keyof typeof placeTypesConfig]?.Icon || MapPin
+    );
   };
 
   const getTypeColor = (type: string) => {
-    return placeTypesConfig[type as keyof typeof placeTypesConfig]?.color || "bg-gray-500";
+    return (
+      placeTypesConfig[type as keyof typeof placeTypesConfig]?.color ||
+      "bg-gray-500"
+    );
   };
 
   const resetAllFilters = () => {
@@ -259,13 +274,18 @@ export default function ExplorerPage() {
   };
 
   // Affichage pendant le chargement initial
-  if (!userPosition || (loading && places.length === 0 && !isInitialized.current)) {
+  if (
+    !userPosition ||
+    (loading && places.length === 0 && !isInitialized.current)
+  ) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
           <p className="mt-4 text-gray-600 dark:text-gray-400">
-            {isLoadingPosition ? 'Récupération de votre position...' : 'Chargement des lieux...'}
+            {isLoadingPosition
+              ? "Récupération de votre position..."
+              : "Chargement des lieux..."}
           </p>
           {positionError && (
             <p className="mt-2 text-sm text-amber-600">
@@ -291,7 +311,7 @@ export default function ExplorerPage() {
                 Découvrez les meilleurs espaces de travail à Casablanca
               </p>
             </div>
-            
+
             {/* Statut de géolocalisation */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-sm dark:bg-gray-800">
@@ -307,7 +327,8 @@ export default function ExplorerPage() {
                     <MapPin className="h-5 w-5 text-green-500" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                       Position GPS
-                      {userPosition.accuracy && ` (±${Math.round(userPosition.accuracy)}m)`}
+                      {userPosition.accuracy &&
+                        ` (±${Math.round(userPosition.accuracy)}m)`}
                     </span>
                   </>
                 )}
@@ -318,7 +339,9 @@ export default function ExplorerPage() {
                 className="rounded-lg p-2 text-blue-600 transition hover:bg-blue-50 disabled:opacity-50 dark:hover:bg-blue-900/30"
                 title="Rafraîchir la position"
               >
-                <RefreshCw className={`h-5 w-5 ${isLoadingPosition ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-5 w-5 ${isLoadingPosition ? "animate-spin" : ""}`}
+                />
               </button>
             </div>
           </div>
@@ -366,12 +389,15 @@ export default function ExplorerPage() {
                   </h3>
                   <div className="space-y-2">
                     {typesLieux.map((type) => {
-                      const config = placeTypesConfig[type.value as keyof typeof placeTypesConfig];
+                      const config =
+                        placeTypesConfig[
+                          type.value as keyof typeof placeTypesConfig
+                        ];
                       if (!config) return null;
-                      
+
                       const Icon = config.Icon;
                       const isSelected = selectedTypes.includes(type.value);
-                      
+
                       return (
                         <button
                           key={type.value}
@@ -426,12 +452,17 @@ export default function ExplorerPage() {
                   </h3>
                   <select
                     value={selectedDistance}
-                    onChange={(e) => setSelectedDistance(Number(e.target.value))}
+                    onChange={(e) =>
+                      setSelectedDistance(Number(e.target.value))
+                    }
                     className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                   >
                     {distances.map((distance) => (
                       <option key={distance} value={distance}>
-                        Dans un rayon de {distance >= 1000 ? `${distance/1000}km` : `${distance}m`}
+                        Dans un rayon de{" "}
+                        {distance >= 1000
+                          ? `${distance / 1000}km`
+                          : `${distance}m`}
                       </option>
                     ))}
                   </select>
@@ -457,7 +488,9 @@ export default function ExplorerPage() {
                 )}
 
                 {/* Reset Filters */}
-                {(selectedTypes.length > 0 || selectedCalm || showFavorites) && (
+                {(selectedTypes.length > 0 ||
+                  selectedCalm ||
+                  showFavorites) && (
                   <button
                     onClick={() => {
                       setSelectedTypes([]);
@@ -544,12 +577,13 @@ export default function ExplorerPage() {
                                 <MapPin className="h-4 w-4" />
                                 {place.address}
                               </p>
+
                               <div className="flex flex-wrap items-center gap-3">
                                 {place.distance !== undefined && (
                                   <>
                                     <span className="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                                       <span className="font-medium">
-                                        {place.distance >= 1000 
+                                        {place.distance >= 1000
                                           ? `${(place.distance / 1000).toFixed(1)}km`
                                           : `${place.distance}m`}
                                       </span>
@@ -572,7 +606,8 @@ export default function ExplorerPage() {
                                       •
                                     </span>
                                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                                      ⭐ {place.noteMoyenne.toFixed(1)} ({place.nombreAvis} avis)
+                                      ⭐ {place.noteMoyenne.toFixed(1)} (
+                                      {place.nombreAvis} avis)
                                     </span>
                                   </>
                                 )}
@@ -581,7 +616,12 @@ export default function ExplorerPage() {
                           </div>
                           {isAuthenticated && (
                             <button
-                              onClick={() => toggleFavorite(place.id, place.isFavorite || false)}
+                              onClick={() =>
+                                toggleFavorite(
+                                  place.id,
+                                  place.isFavorite || false,
+                                )
+                              }
                               className="flex-shrink-0 rounded-lg p-2 transition hover:bg-gray-100 dark:hover:bg-gray-700"
                               disabled={loading}
                             >
@@ -594,6 +634,16 @@ export default function ExplorerPage() {
                               />
                             </button>
                           )}
+                          {/* Bouton Voir Détail */}
+                          <button
+                            onClick={() =>
+                              router.push(`/espace-user/lieux/${place.id}`)
+                            }
+                            className="mt-2 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:bg-blue-600 hover:text-white dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-blue-500"
+                          >
+                            <Info className="h-4 w-4" />
+                            Voir le détail
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -607,10 +657,12 @@ export default function ExplorerPage() {
                       <Search className="h-8 w-8 text-gray-400" />
                     </div>
                     <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                      {showFavorites ? "Aucun favori trouvé" : "Aucun lieu trouvé"}
+                      {showFavorites
+                        ? "Aucun favori trouvé"
+                        : "Aucun lieu trouvé"}
                     </h3>
                     <p className="mb-6 text-gray-600 dark:text-gray-400">
-                      {showFavorites 
+                      {showFavorites
                         ? "Vous n'avez pas encore ajouté de lieux en favoris"
                         : "Essayez d'ajuster vos filtres pour voir plus de résultats"}
                     </p>
@@ -629,8 +681,8 @@ export default function ExplorerPage() {
                 className="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-gray-800"
                 style={{ height: "600px" }}
               >
-                <MapComponent 
-                  places={places} 
+                <MapComponent
+                  places={places}
                   userPosition={userPosition}
                   showUserPosition={true}
                 />
@@ -642,9 +694,3 @@ export default function ExplorerPage() {
     </div>
   );
 }
-
-
-
-
-
-

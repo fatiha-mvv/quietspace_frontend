@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import authService from "../../services/auth.service";
-import { useVilles } from "../hooks/useVilles"; // ← Ton hook
+import { useVilles } from "../hooks/useVilles"; 
 
 const SignupPage = () => {
   const router = useRouter();
   const { villes, loading: loadingVilles } = useVilles();
 
   const [formData, setFormData] = useState({
-  username: "",  // ← Changer "name" en "username"
+  username: "",  
   email: "",
   password: "",
   ville: "",
@@ -53,12 +53,12 @@ const SignupPage = () => {
 
     try {
       await authService.register({
-  username: formData.username,  // ← Au lieu de "name"
-  email: formData.email,
-  password: formData.password,
-  ville: formData.ville,
-});
-      router.push("/dashboard");
+      username: formData.username,  
+      email: formData.email,
+      password: formData.password,
+      ville: formData.ville,
+    });
+      router.push("/");
     } catch (err: any) {
       console.error("Register error:", err);
       setError(
@@ -102,7 +102,7 @@ const SignupPage = () => {
                   </label>
                   <input
                     type="text"
-                    name="username"  // CHANGÉ de "name" à "username"
+                    name="username"  
                     value={formData.username}
                     onChange={handleChange}
                     placeholder="Entrez votre nom complet"

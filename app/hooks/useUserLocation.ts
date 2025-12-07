@@ -107,14 +107,14 @@ export function useUserLocation(
     };
 
     if (positionError) {
-      console.warn('⚠️ Erreur de géolocalisation:', getErrorMessage(positionError));
+      console.warn(' Erreur de géolocalisation:', getErrorMessage(positionError));
     } else if (!isGeolocationAvailable) {
-      console.warn('⚠️ Géolocalisation non supportée par ce navigateur');
+      console.warn(' Géolocalisation non supportée par ce navigateur');
     } else if (!isGeolocationEnabled) {
-      console.warn('⚠️ Géolocalisation non activée ou permission refusée');
+      console.warn('Géolocalisation non activée ou permission refusée');
     }
 
-    console.log('📍 Utilisation de la position par défaut (Casablanca centre)');
+    console.log(' Utilisation de la position par défaut (Casablanca centre)');
   }
 
   return {

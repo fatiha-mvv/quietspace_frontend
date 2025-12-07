@@ -15,15 +15,15 @@ import {
   Navigation,
   Loader2,
 } from "lucide-react";
-import lieuxUserService, { Lieu } from "../../../services/lieux-user";
-import authService from "../../../services/auth.service";
+import lieuxUserService, { Lieu } from "../../../../services/lieux-user";
+import authService from "../../../../services/auth.service";
 import dynamic from "next/dynamic";
-import AuthenticatedGuard from "../../../components/AuthGuard/authguard"; 
-import RatingModal from "../../../components/RatingModal/RatingModal";
+import AuthenticatedGuard from "../../../../components/AuthGuard/authguard";
+import RatingModal from "../../../../components/RatingModal/RatingModal";
 
 // Import dynamique de la carte
 const MapComponent = dynamic(
-  () => import("../../../components/Map/MapComponent"),
+  () => import("../../../../components/Map/MapComponent"),
   {
     ssr: false,
     loading: () => (
@@ -31,7 +31,7 @@ const MapComponent = dynamic(
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     ),
-  }
+  },
 );
 
 // Configuration des icônes
@@ -39,7 +39,11 @@ const placeTypesConfig = {
   BIBLIOTHEQUE: { Icon: BookOpen, color: "bg-blue-500", label: "Bibliothèque" },
   CAFE: { Icon: Coffee, color: "bg-amber-500", label: "Café" },
   COWORKING: { Icon: Briefcase, color: "bg-purple-500", label: "Coworking" },
-  SALLE_ETUDE: { Icon: GraduationCap, color: "bg-green-500", label: "Salle d'étude" },
+  SALLE_ETUDE: {
+    Icon: GraduationCap,
+    color: "bg-green-500",
+    label: "Salle d'étude",
+  },
 };
 
 export default function LieuDetailPage() {
@@ -53,7 +57,7 @@ export default function LieuDetailPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [userRating, setUserRating] = useState<number | null>(null);
-  
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
 
@@ -65,17 +69,17 @@ export default function LieuDetailPage() {
     const initPage = async () => {
       const isAuth = authService.isAuthenticated();
       setIsAuthenticated(isAuth);
-      
+
       // Charger les détails du lieu
       await loadLieuDetails();
-      
+
       // Si authentifié, charger l'avis et vérifier si favori
       if (isAuth) {
         await loadUserRating();
-        await checkIfFavorite(); // ⭐ NOUVEAU
+        await checkIfFavorite();
       }
     };
-    
+
     initPage();
   }, [id]);
 
@@ -87,7 +91,7 @@ export default function LieuDetailPage() {
       // Chercher si ce lieu est dans les favoris
       const isFav = favoris.some((fav: any) => fav.lieu.idLieu === id);
       setIsFavorite(isFav);
-      
+
       // Mettre à jour également l'objet lieu
       if (lieu) {
         setLieu({ ...lieu, isFavorite: isFav });
@@ -126,6 +130,8 @@ export default function LieuDetailPage() {
     try {
       setLoading(true);
       const data = await lieuxUserService.getLieuById(id);
+      console.log("Lieu details loaded:", data);
+
       setLieu(data);
       setError(null);
     } catch (err) {
@@ -144,7 +150,7 @@ export default function LieuDetailPage() {
 
     try {
       setFavoriteLoading(true);
-      
+
       if (isFavorite) {
         // Retirer des favoris
         await lieuxUserService.removeFavoris(id);
@@ -164,13 +170,16 @@ export default function LieuDetailPage() {
       }
     } catch (error: any) {
       console.error(" Erreur lors du toggle favori:", error);
-      
+
       // Afficher un message d'erreur plus détaillé
       if (error.response?.status === 401) {
         alert("Votre session a expiré. Veuillez vous reconnecter.");
         router.push("/login");
       } else {
-        alert(error.response?.data?.message || "Erreur lors de la modification du favori");
+        alert(
+          error.response?.data?.message ||
+            "Erreur lors de la modification du favori",
+        );
       }
     } finally {
       setFavoriteLoading(false);
@@ -228,7 +237,7 @@ export default function LieuDetailPage() {
       ) : (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           {/* Header avec image */}
-          <div className="relative h-96 w-full">
+          <div className="relative h-96 w-full pt-5">
             {lieu.image ? (
               <img
                 src={lieu.image}
@@ -257,7 +266,7 @@ export default function LieuDetailPage() {
             {/* Bouton retour */}
             <button
               onClick={handleGoBack}
-              className="absolute left-4 top-4 z-50 rounded-lg bg-blue-600 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-blue-700"
+              className="absolute left-4 top-10 z-50 rounded-lg bg-blue-600 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-blue-700"
             >
               ← Retour
             </button>
@@ -266,7 +275,7 @@ export default function LieuDetailPage() {
               <button
                 onClick={toggleFavorite}
                 disabled={favoriteLoading}
-                className="absolute right-4 top-4 z-50 rounded-lg bg-white/90 p-3 shadow-lg backdrop-blur-sm transition hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute right-4 top-10 z-50 rounded-lg bg-white/90 p-3 shadow-lg backdrop-blur-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {favoriteLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin text-gray-900" />
@@ -274,7 +283,7 @@ export default function LieuDetailPage() {
                   <Heart
                     className={`h-5 w-5 transition-all ${
                       isFavorite
-                        ? "fill-red-500 text-red-500 scale-110"
+                        ? "scale-110 fill-red-500 text-red-500"
                         : "text-gray-900 hover:text-red-500"
                     }`}
                   />
@@ -288,8 +297,9 @@ export default function LieuDetailPage() {
                 <div className="mb-3 flex items-center gap-3">
                   <div
                     className={`rounded-xl p-3 ${
-                      placeTypesConfig[lieu.type as keyof typeof placeTypesConfig]
-                        ?.color || "bg-gray-500"
+                      placeTypesConfig[
+                        lieu.type as keyof typeof placeTypesConfig
+                      ]?.color || "bg-gray-500"
                     }`}
                   >
                     {(() => {
@@ -301,8 +311,9 @@ export default function LieuDetailPage() {
                     })()}
                   </div>
                   <span className="rounded-full bg-white/20 px-4 py-1 text-sm font-medium text-white backdrop-blur-sm">
-                    {placeTypesConfig[lieu.type as keyof typeof placeTypesConfig]
-                      ?.label || lieu.type}
+                    {placeTypesConfig[
+                      lieu.type as keyof typeof placeTypesConfig
+                    ]?.label || lieu.type}
                   </span>
                 </div>
                 <h1 className="text-4xl font-bold text-white">{lieu.name}</h1>
@@ -363,11 +374,14 @@ export default function LieuDetailPage() {
                           Ajouté le
                         </p>
                         <p className="text-gray-600 dark:text-gray-400">
-                          {new Date(lieu.createdAt).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })}
+                          {new Date(lieu.createdAt).toLocaleDateString(
+                            "fr-FR",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            },
+                          )}
                         </p>
                       </div>
                     </div>
@@ -403,7 +417,7 @@ export default function LieuDetailPage() {
                       </span>
                       <span
                         className={`rounded-full px-4 py-2 text-sm font-semibold text-white ${getCalmColor(
-                          lieu.scoreCalme
+                          lieu.scoreCalme,
                         )}`}
                       >
                         {getCalmLabel(lieu.niveauCalme)}
@@ -414,7 +428,7 @@ export default function LieuDetailPage() {
                     <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                       <div
                         className={`h-full transition-all ${getCalmColor(
-                          lieu.scoreCalme
+                          lieu.scoreCalme,
                         )}`}
                         style={{ width: `${lieu.scoreCalme}%` }}
                       />
@@ -423,7 +437,7 @@ export default function LieuDetailPage() {
                 </div>
 
                 {/* Notes et avis */}
-                {lieu.noteMoyenne !== null && (
+                {/* {lieu.noteMoyenne !== null && (
                   <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
                     <div className="mb-4 flex items-center gap-3">
                       <Star className="h-6 w-6 text-gray-400" />
@@ -464,33 +478,94 @@ export default function LieuDetailPage() {
                       </div>
 
                       <button
-                        onClick={() => setIsRatingModalOpen(true)} 
+                        onClick={() => setIsRatingModalOpen(true)}
                         className="w-full rounded-lg border-2 border-blue-600 px-4 py-3 font-medium text-blue-600 transition hover:bg-blue-50 dark:hover:bg-blue-900/30"
                       >
                         {userRating ? "Modifier mon avis" : "Donner mon avis"}
                       </button>
                     </div>
                   </div>
-                )}
+                )} */}
+                {/* Notes et avis */}
+                <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+                  <div className="mb-4 flex items-center gap-3">
+                    <Star className="h-6 w-6 text-gray-400" />
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                      Évaluations
+                    </h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <div className="text-4xl font-bold text-gray-900 dark:text-white">
+                          {lieu.noteMoyenne !== null
+                            ? lieu.noteMoyenne.toFixed(1)
+                            : "-"}
+                        </div>
+                        <div className="mt-2 flex justify-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-5 w-5 ${
+                                lieu.noteMoyenne !== null &&
+                                i < Math.round(lieu.noteMoyenne)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {lieu.nombreAvis && lieu.nombreAvis > 0 ? (
+                            <>
+                              Basé sur{" "}
+                              <span className="font-semibold text-gray-900 dark:text-white">
+                                {lieu.nombreAvis}
+                              </span>{" "}
+                              avis
+                            </>
+                          ) : (
+                            "Pas encore d’avis"
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setIsRatingModalOpen(true)}
+                      className="w-full rounded-lg border-2 border-blue-600 px-4 py-3 font-medium text-blue-600 transition hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                    >
+                      {userRating ? "Modifier mon avis" : "Donner mon avis"}
+                    </button>
+                  </div>
+                </div>
 
                 {isAuthenticated && (
-                  <div className={`rounded-xl p-6 text-white shadow-sm transition-all ${
-                    isFavorite 
-                      ? "bg-gradient-to-br from-red-500 to-pink-600" 
-                      : "bg-gradient-to-br from-blue-600 to-purple-600"
-                  }`}>
+                  <div
+                    className={`rounded-xl p-6 text-white shadow-sm transition-all ${
+                      isFavorite
+                        ? "bg-gradient-to-br from-red-500 to-pink-600"
+                        : "bg-gradient-to-br from-blue-600 to-purple-600"
+                    }`}
+                  >
                     <h3 className="mb-2 text-lg font-bold">
-                      {isFavorite ? "Lieu dans vos favoris !" : "Vous aimez cet endroit ?"}
+                      {isFavorite
+                        ? "Lieu dans vos favoris !"
+                        : "Vous aimez cet endroit ?"}
                     </h3>
                     <p className="mb-4 text-sm opacity-90">
-                      {isFavorite 
+                      {isFavorite
                         ? "Ce lieu est sauvegardé dans vos favoris"
                         : "Ajoutez-le à vos favoris pour le retrouver facilement !"}
                     </p>
                     <button
                       onClick={toggleFavorite}
                       disabled={favoriteLoading}
-                      className="w-full rounded-lg bg-white px-4 py-3 font-medium transition hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 font-medium transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                       style={{ color: isFavorite ? "#dc2626" : "#2563eb" }}
                     >
                       {favoriteLoading ? (
@@ -501,7 +576,9 @@ export default function LieuDetailPage() {
                       ) : (
                         <>
                           <Heart className={isFavorite ? "fill-current" : ""} />
-                          {isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+                          {isFavorite
+                            ? "Retirer des favoris"
+                            : "Ajouter aux favoris"}
                         </>
                       )}
                     </button>

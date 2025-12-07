@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 // Fix pour les icônes par défaut
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
 interface LieuLike {
@@ -35,10 +36,10 @@ interface MapComponentProps {
   showUserPosition?: boolean;
 }
 
-export default function MapComponent({ 
-  places, 
+export default function MapComponent({
+  places,
   userPosition,
-  showUserPosition = true 
+  showUserPosition = true,
 }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -51,14 +52,14 @@ export default function MapComponent({
     if (!mapRef.current || mapInstanceRef.current) return;
 
     // Déterminer le centre initial (position utilisateur ou Casablanca par défaut)
-    const initialCenter: [number, number] = userPosition 
+    const initialCenter: [number, number] = userPosition
       ? [userPosition.latitude, userPosition.longitude]
       : [33.5731, -7.5898];
 
     const map = L.map(mapRef.current).setView(initialCenter, 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
     }).addTo(map);
 
     mapInstanceRef.current = map;
@@ -89,7 +90,7 @@ export default function MapComponent({
 
     // Créer une icône personnalisée pour l'utilisateur
     const userIcon = L.divIcon({
-      className: 'user-location-marker',
+      className: "user-location-marker",
       html: `
         <div style="position: relative; width: 24px; height: 24px;">
           <div style="
@@ -99,12 +100,15 @@ export default function MapComponent({
             transform: translate(-50%, -50%);
             width: 16px;
             height: 16px;
-            background: ${userPosition.isDefault ? '#f59e0b' : '#3b82f6'};
+            background: ${userPosition.isDefault ? "#f59e0b" : "#3b82f6"};
             border: 3px solid white;
             border-radius: 50%;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
           "></div>
-          ${userPosition.isDefault ? '' : `
+          ${
+            userPosition.isDefault
+              ? ""
+              : `
             <div style="
               position: absolute;
               top: 50%;
@@ -117,7 +121,8 @@ export default function MapComponent({
               border-radius: 50%;
               animation: pulse 2s ease-in-out infinite;
             "></div>
-          `}
+          `
+          }
         </div>
         <style>
           @keyframes pulse {
@@ -133,17 +138,17 @@ export default function MapComponent({
     // Ajouter le marqueur utilisateur
     const userMarker = L.marker(
       [userPosition.latitude, userPosition.longitude],
-      { icon: userIcon }
+      { icon: userIcon },
     ).addTo(mapInstanceRef.current);
 
     // Créer le popup pour l'utilisateur
-    const positionType = userPosition.isDefault 
-      ? '📍 Position par défaut (Casablanca centre)'
-      : '📍 Votre position actuelle';
-    
-    const accuracyText = userPosition.accuracy 
+    const positionType = userPosition.isDefault
+      ? " Position par défaut (Casablanca centre)"
+      : " Votre position actuelle";
+
+    const accuracyText = userPosition.accuracy
       ? `<br/>Précision: ±${Math.round(userPosition.accuracy)}m`
-      : '';
+      : "";
 
     userMarker.bindPopup(`
       <div style="padding: 8px; min-width: 200px; text-align: center;">
@@ -165,11 +170,11 @@ export default function MapComponent({
         [userPosition.latitude, userPosition.longitude],
         {
           radius: userPosition.accuracy,
-          color: '#3b82f6',
-          fillColor: '#3b82f6',
+          color: "#3b82f6",
+          fillColor: "#3b82f6",
           fillOpacity: 0.1,
           weight: 1,
-        }
+        },
       ).addTo(mapInstanceRef.current);
 
       accuracyCircleRef.current = accuracyCircle;
@@ -179,10 +184,9 @@ export default function MapComponent({
     if (places.length === 0 || userPosition.isDefault) {
       mapInstanceRef.current.setView(
         [userPosition.latitude, userPosition.longitude],
-        userPosition.isDefault ? 13 : 15
+        userPosition.isDefault ? 13 : 15,
       );
     }
-
   }, [userPosition, showUserPosition, places.length]);
 
   // Mettre à jour les marqueurs des lieux
@@ -199,7 +203,7 @@ export default function MapComponent({
     // Si on a des lieux, ajuster la vue pour tout montrer
     if (places.length > 0) {
       const bounds = L.latLngBounds(
-        places.map(place => [place.lat, place.lng] as [number, number])
+        places.map((place) => [place.lat, place.lng] as [number, number]),
       );
 
       // Inclure la position utilisateur dans les bounds si disponible
@@ -213,8 +217,8 @@ export default function MapComponent({
     // Ajouter les marqueurs des lieux
     places.forEach((place) => {
       if (
-        typeof place.lat !== 'number' ||
-        typeof place.lng !== 'number' ||
+        typeof place.lat !== "number" ||
+        typeof place.lng !== "number" ||
         Number.isNaN(place.lat) ||
         Number.isNaN(place.lng)
       ) {
@@ -223,14 +227,14 @@ export default function MapComponent({
 
       // Créer une icône personnalisée selon le score de calme
       const getCalmColor = (score: number): string => {
-        if (score >= 85) return '#10b981'; // vert
-        if (score >= 70) return '#3b82f6'; // bleu
-        if (score >= 50) return '#f59e0b'; // orange
-        return '#ef4444'; // rouge
+        if (score >= 85) return "#10b981"; // vert
+        if (score >= 70) return "#3b82f6"; // bleu
+        if (score >= 50) return "#f59e0b"; // orange
+        return "#ef4444"; // rouge
       };
 
       const placeIcon = L.divIcon({
-        className: 'place-marker',
+        className: "place-marker",
         html: `
           <div style="
             background: ${getCalmColor(place.scoreCalme)};
@@ -253,9 +257,10 @@ export default function MapComponent({
         iconAnchor: [16, 16],
       });
 
-      const marker = L.marker([place.lat, place.lng], { icon: placeIcon })
-        .addTo(mapInstanceRef.current!);
-      
+      const marker = L.marker([place.lat, place.lng], {
+        icon: placeIcon,
+      }).addTo(mapInstanceRef.current!);
+
       // Créer le popup avec un bouton
       const popupContent = `
         <div style="padding: 8px; min-width: 200px;">
@@ -278,16 +283,16 @@ export default function MapComponent({
       marker.bindPopup(popupContent);
 
       // Ajouter l'événement au clic sur le bouton
-      marker.on('popupopen', () => {
+      marker.on("popupopen", () => {
         const button = document.getElementById(`view-details-${place.id}`);
         if (button) {
-          button.addEventListener('click', () => {
-            router.push(`/lieux-details/${place.id}`);
+          button.addEventListener("click", () => {
+            router.push(`/espace-user/lieux/${place.id}`);
           });
         }
       });
     });
   }, [places, router, userPosition]);
 
-  return <div ref={mapRef} style={{ width: '100%', height: '100%' }} />;
+  return <div ref={mapRef} style={{ width: "100%", height: "100%" }} />;
 }

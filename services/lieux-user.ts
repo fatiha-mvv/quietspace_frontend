@@ -122,6 +122,7 @@ class LieuxUserService {
       if (params?.distance !== undefined) {
         queryParams.append('distance', params.distance.toString());
       }
+      
 
       const url = `${API_URL}/lieux${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       const response = await axios.get(url);

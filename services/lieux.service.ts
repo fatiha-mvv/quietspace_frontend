@@ -140,17 +140,6 @@ class LieuxService {
     }
   }
 
-  // Recherche avancée
-  async getNearby(lat: number, lng: number, radius: number): Promise<Lieu[]> {
-    try {
-      const response = await this.api.get('/recherche/proximite', {
-        params: { lat, lng, radius }
-      });
-      return response.data.map((lieu: Lieu) => this.normalizeLieu(lieu));
-    } catch (error) {
-      this.handleError(error);
-    }
-  }
 
   async getByType(idTypeLieu: number): Promise<Lieu[]> {
     try {
@@ -192,7 +181,7 @@ class LieuxService {
         },
       });
 
-      // Le backend renvoie le chemin relatif (ex: images/lieux/photo.jpg)
+      // Le backend renvoie le chemin relatif (images/lieux/photo.jpg)
       // On retourne ce chemin tel quel, il sera normalisé lors de la récupération
       return response.data.url || response.data.path || response.data.filename;
     } catch (error) {
